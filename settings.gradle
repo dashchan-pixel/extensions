@@ -1,4 +1,0 @@
-include ':engines:vichan'
-includeBuild 'library'
-file('engines').listFiles().each { include ":engines:$it.name" }
-file('extensions').listFiles().each { include ":extensions:$it.name" }

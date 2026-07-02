@@ -16,17 +16,10 @@ public class DvachChanLocator extends ChanLocator {
 			+ "src/(\\d+)/\\d+\\.\\w+");
 
 	public DvachChanLocator() {
+		addChanHost("2ch.org");
 		addChanHost("2ch.su");
 		addChanHost("2ch.life");
 		addChanHost("2ch.hk");
-		addChanHost("2ch.pm");
-		addChanHost("beta.2ch.hk");
-		addConvertableChanHost("2ch.cm");
-		addConvertableChanHost("2ch.re");
-		addConvertableChanHost("2ch.tf");
-		addConvertableChanHost("2ch.wf");
-		addConvertableChanHost("2ch.yt");
-		addConvertableChanHost("2-ch.so");
 		setHttpsMode(HttpsMode.CONFIGURABLE);
 	}
 
