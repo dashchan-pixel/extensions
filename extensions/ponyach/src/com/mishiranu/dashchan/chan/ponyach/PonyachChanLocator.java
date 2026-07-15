@@ -15,12 +15,13 @@ public class PonyachChanLocator extends ChanLocator
 
 	public PonyachChanLocator()
 	{
-		addChanHost("ponyach.ru");
-		addChanHost("ponychan.ru");
-		addChanHost("ponya.ch");
-		addChanHost("ponyach.cf");
-		addChanHost("ponyach.ga");
-		addChanHost("ponyach.ml");
+		addChanHost("ponyach.com");
+		addConvertableChanHost("ponyach.ru");
+		addConvertableChanHost("ponychan.ru");
+		addConvertableChanHost("ponya.ch");
+		addConvertableChanHost("ponyach.cf");
+		addConvertableChanHost("ponyach.ga");
+		addConvertableChanHost("ponyach.ml");
 		setHttpsMode(HttpsMode.CONFIGURABLE);
 	}
 
