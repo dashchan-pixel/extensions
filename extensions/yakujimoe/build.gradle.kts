@@ -1,0 +1,14 @@
+plugins {
+	id("chan-extension")
+}
+
+chan {
+	nameUpper = "YakujiMoe"
+	versionName = "1.3"
+	apiVersion = 1
+	hosts("ii.yakuji.moe")
+}
+
+dependencies {
+	implementation(project(":engines:wakaba"))
+}

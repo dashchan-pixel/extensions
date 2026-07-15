@@ -1,0 +1,13 @@
+plugins {
+	id("chan-extension")
+}
+
+chan {
+	versionName = "1.9"
+	apiVersion = 1
+	hosts("nowere.net", "sky.nowere.net", "www.nowere.net")
+}
+
+dependencies {
+	implementation(project(":engines:wakaba"))
+}

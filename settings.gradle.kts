@@ -17,4 +17,5 @@ dependencyResolutionManagement {
 rootProject.name = "Dashchan-Extensions"
 
 includeBuild("library")
-file("extensions").listFiles()?.forEach { include(":extensions:${it.name}") }
+file("engines").listFiles()?.filter { it.isDirectory && File(it, "build.gradle.kts").exists() }?.forEach { include(":engines:${it.name}") }
+file("extensions").listFiles()?.filter { it.isDirectory && File(it, "build.gradle.kts").exists() }?.forEach { include(":extensions:${it.name}") }

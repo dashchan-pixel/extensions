@@ -1,0 +1,13 @@
+plugins {
+	id("chan-extension")
+}
+
+chan {
+	versionName = "1.3"
+	apiVersion = 1
+	hosts("erlach.services", "erlach.co", "www.erlach.co")
+}
+
+dependencies {
+	implementation("chan.library:template-parser:0")
+}

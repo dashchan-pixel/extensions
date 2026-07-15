@@ -1,0 +1,13 @@
+plugins {
+	id("chan-extension")
+}
+
+chan {
+	versionName = "1.2"
+	apiVersion = 1
+	hosts("bunbunmaru.com", "www.bunbunmaru.com")
+}
+
+dependencies {
+	implementation(project(":engines:wakaba"))
+}

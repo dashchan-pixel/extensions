@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string name="text_global_report">Глобальная жалоба</string>
+    <string name="ip_block_bypass_failed">Не удалось обойти блокировку IP</string>
+
+</resources>
