@@ -1,0 +1,28 @@
+# Advisory-only pass for '!!' (double-bang).
+#
+# Run by the `detektDoubleBang` task, which sets ignoreFailures = true: findings are
+# printed but never fail the build. This exists because detekt 1.x fails on *any* finding
+# in a given config (build.maxIssues), so "report but do not block" needs its own config.
+
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+
+console-reports:
+  active: true
+  exclude:
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'NotificationReport'
+    - 'FindingsReport'
+    - 'FileBasedFindingsReport'
+
+comments:
+  active: false
+
+potential-bugs:
+  active: true
+  UnsafeCallOnNullableType:
+    active: true

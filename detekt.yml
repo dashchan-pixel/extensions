@@ -1,0 +1,155 @@
+# Strict quality gate. Layered over detekt's default config (buildUponDefaultConfig = true),
+# so this file only records the deliberate deviations.
+#
+# Any finding not present in detekt-baseline.xml fails the build (build.maxIssues = 0).
+# The baseline freezes the pre-existing legacy findings; new code gets no such amnesty.
+
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+complexity:
+  LongMethod:
+    active: true
+    threshold: 60
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 10
+    ignoreDefaultParameters: true
+  ComplexCondition:
+    active: false
+  CyclomaticComplexMethod:
+    active: false
+  NestedBlockDepth:
+    active: false
+  TooManyFunctions:
+    active: false
+  LargeClass:
+    active: false
+
+empty-blocks:
+  EmptyCatchBlock:
+    active: true
+    allowedExceptionNameRegex: ''
+  EmptyFunctionBlock:
+    active: true
+    ignoreOverridden: true
+  EmptyDefaultConstructor:
+    active: true
+
+exceptions:
+  SwallowedException:
+    active: true
+    ignoredExceptionTypes:
+      - 'InterruptedException'
+      - 'NumberFormatException'
+      - 'ParseException'
+      - 'MalformedURLException'
+      - 'IOException'
+      - 'JSONException'
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+
+  PrintStackTrace:
+    active: false
+  TooGenericExceptionCaught:
+    active: true
+    exceptionNames:
+      - 'Error'
+      - 'Throwable'
+    allowedExceptionNameRegex: ''
+  ReturnFromFinally:
+    active: true
+  ThrowingExceptionFromFinally:
+    active: true
+  RethrowCaughtException:
+    active: false
+
+potential-bugs:
+  UnsafeCallOnNullableType:
+    active: false
+  UnsafeCast:
+    active: true
+  CastToNullableType:
+    active: true
+  UnreachableCode:
+    active: false
+  UnnecessaryNotNullOperator:
+    active: true
+  NullableToStringCall:
+    active: true
+
+style:
+  MaxLineLength:
+    active: false
+  WildcardImport:
+    active: false
+  MagicNumber:
+    active: false
+  ReturnCount:
+    active: false
+  ThrowsCount:
+    active: false
+  UnusedPrivateMember:
+    active: true
+  ForbiddenComment:
+    active: false
+  LoopWithTooManyJumpStatements:
+    active: false
+  UnnecessaryAbstractClass:
+    active: false
+
+  CanBeNonNullable:
+    active: true
+  VarCouldBeVal:
+    active: true
+  ExplicitCollectionElementAccessMethod:
+    active: true
+  UseRequire:
+    active: true
+  UseRequireNotNull:
+    active: true
+  UseCheckOrError:
+    active: true
+  UseCheckNotNull:
+    active: true
+  NullableBooleanCheck:
+    active: true
+  UtilityClassWithPublicConstructor:
+    active: true
+  ObjectLiteralToLambda:
+    active: true
+  ForbiddenVoid:
+    active: true
+  ExplicitItLambdaParameter:
+    active: true
+  UnnecessaryLet:
+    active: true
+  UnnecessaryApply:
+    active: true
+  UnnecessaryFilter:
+    active: true
+  SerialVersionUIDInSerializableClass:
+    active: true
+
+performance:
+  SpreadOperator:
+    active: false
+
+naming:
+  FunctionNaming:
+    active: false
+  VariableNaming:
+    active: false
+  ConstructorParameterNaming:
+    active: false
+  TopLevelPropertyNaming:
+    active: false
+  ObjectPropertyNaming:
+    active: false
+
+comments:
+  active: false
