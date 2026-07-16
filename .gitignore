@@ -1,26 +1,31 @@
-# Gradle build directories and cache
+# 1. Ignore everything in root by default (allowlist approach)
+/*
+
+# 2. Allow specific root configuration and documentation files
+!/.gitignore
+!/.github/
+!/build.gradle.kts
+!/settings.gradle.kts
+!/gradle.properties
+!/chan.properties
+!/COPYING
+!/README.md
+!/build.sh
+!/gradlew
+!/gradlew.bat
+!/gradle/
+
+# 3. Allow top-level project directories
+!/build-logic/
+!/chans/
+!/engines/
+!/sdk/
+
+# 4. Ignore build artifacts and cache within allowed directories
 **/build/
 **/.gradle/
-
-# Local machine configuration & signing secrets
-local.properties
-keystore.properties
-
-# Android & Gradle artifacts
 *.apk
 *.aar
 *.ap_
 *.dex
 *.class
-
-# IDE (IntelliJ / Android Studio)
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# OS generated & temporary log files
-.DS_Store
-Thumbs.db
-*.log
-logcat.txt
