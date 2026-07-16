@@ -1005,7 +1005,7 @@ class FourchanChanPerformer : ChanPerformer() {
 			if (responseText.contains("https://mcl.spur.us")) {
 				val matcher = Pattern.compile("https://mcl\\.spur\\.us/d/mcl\\.js\\?tk=[a-zA-Z0-9._-]+").matcher(responseText)
 				if (matcher.find()) {
-					val scriptUrl = matcher.group(0)
+					val scriptUrl = matcher.group(0) ?: return null
 					val key = session.getKey(FirewallResolver.Identifier.Flag.USER_AGENT) ?: return null
 					return CheckResponseResult(key, Exclusive(scriptUrl))
 				}
