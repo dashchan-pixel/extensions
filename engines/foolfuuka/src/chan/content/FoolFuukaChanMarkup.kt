@@ -10,8 +10,7 @@ open class FoolFuukaChanMarkup : ChanMarkup() {
         addTag("span", "greentext", TAG_QUOTE)
     }
 
-    override fun obtainPostLinkThreadPostNumbers(uriString: String?): Pair<String, String>? {
-        if (uriString == null) return null
+    override fun obtainPostLinkThreadPostNumbers(uriString: String): Pair<out Any?, out Any?>? {
         val matcher = THREAD_LINK.matcher(uriString)
         if (matcher.find()) {
             return Pair(matcher.group(1), matcher.group(2))

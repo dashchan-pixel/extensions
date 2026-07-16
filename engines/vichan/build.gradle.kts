@@ -1,8 +1,8 @@
 plugins {
-	id("chan-library")
+    id("chan-library")
 }
 
 dependencies {
-	compileOnly("chan.library:api:0")
-	api("chan.library:template-parser:0")
+    compileOnly("chan.library:api:0")
+    api("chan.library:template-parser:0")
 }

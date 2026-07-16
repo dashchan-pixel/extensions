@@ -13,7 +13,6 @@ import java.util.ArrayList
 import java.util.Locale
 
 open class VichanModelMapper {
-
     open class Extra {
         open var replies: Int = 0
         open var images: Int = 0
@@ -26,7 +25,7 @@ open class VichanModelMapper {
             reader: JsonSerial.Reader,
             locator: VichanChanLocator,
             boardName: String?,
-            fromCatalog: Boolean
+            fromCatalog: Boolean,
         ): Posts {
             val posts = ArrayList<Post>()
             var postsCount = 0
@@ -35,7 +34,7 @@ open class VichanModelMapper {
                 val extra = Extra()
                 val originalPost = createPost(reader, locator, boardName, extra)
                 postsCount = extra.replies + 1
-                filesCount = extra.images + originalPost.getAttachmentsCount()
+                filesCount = extra.images + originalPost.attachmentsCount
                 posts.add(originalPost)
             } else {
                 reader.startObject()
@@ -49,7 +48,7 @@ open class VichanModelMapper {
                                 posts.add(post)
                                 if (extra != null) {
                                     postsCount = extra.replies + 1
-                                    filesCount = extra.images + post.getAttachmentsCount()
+                                    filesCount = extra.images + post.attachmentsCount
                                     extra = null
                                 }
                             }
@@ -69,7 +68,7 @@ open class VichanModelMapper {
             reader: JsonSerial.Reader,
             locator: VichanChanLocator,
             boardName: String?,
-            extra: Extra?
+            extra: Extra?,
         ): Post {
             val post = Post()
             var tim: String? = null
@@ -153,7 +152,7 @@ open class VichanModelMapper {
                 attachments.add(0, createFileAttachment(locator, boardName, tim, ext, filename, size, width, height))
                 post.setAttachments(attachments)
             }
-            if (CommonUtils.equals(post.getIdentifier(), post.getCapcode())) {
+            if (CommonUtils.equals(post.identifier, post.capcode)) {
                 post.setIdentifier(null)
             }
 
@@ -169,19 +168,20 @@ open class VichanModelMapper {
             filename: String?,
             size: Int,
             width: Int,
-            height: Int
+            height: Int,
         ): FileAttachment {
             val attachment = FileAttachment()
             if (ext != "deleted") {
                 attachment.setSize(size)
                 attachment.setWidth(width)
                 attachment.setHeight(height)
-                val thumbnailFile: String? = when (ext) {
-                    ".mp4", ".webm" -> "$tim.jpg"
-                    ".pdf" -> "pdf.png"
-                    ".webp", ".gif", ".jpeg", ".jpg" -> "$tim.png"
-                    else -> "$tim$ext"
-                }
+                val thumbnailFile: String? =
+                    when (ext) {
+                        ".mp4", ".webm" -> "$tim.jpg"
+                        ".pdf" -> "pdf.png"
+                        ".webp", ".gif", ".jpeg", ".jpg" -> "$tim.png"
+                        else -> "$tim$ext"
+                    }
                 attachment.setFileUri(locator, locator.createFileUri(boardName, tim, ext))
                 attachment.setThumbnailUri(locator, locator.createThumbnailUri(boardName, thumbnailFile))
                 attachment.setOriginalName(filename)
@@ -194,7 +194,7 @@ open class VichanModelMapper {
         fun parseExtraFile(
             reader: JsonSerial.Reader,
             locator: VichanChanLocator,
-            boardName: String?
+            boardName: String?,
         ): FileAttachment {
             var tim: String? = null
             var ext: String? = null
@@ -218,14 +218,13 @@ open class VichanModelMapper {
         }
 
         @JvmStatic
-        fun parseComment(comment: String): String {
-            return comment
+        fun parseComment(comment: String): String =
+            comment
                 .replace("%23".toRegex(), "#")
                 .replace("(?<=<a href=\")https://jump\\.kolyma\\.net/\\?".toRegex(), "")
                 .replace("(?<=<span )class=\"datamining".toRegex(), "style=\"color:#6F6")
                 .replace("(?<=<span )class=\"heading".toRegex(), "style=\"color:#AF0A0F")
                 .replace("(?<=<span )class=\"heading2".toRegex(), "style=\"color:#2424AD")
                 .replace("(?<=<span )class=\"quote2".toRegex(), "style=\"color:#F6750B")
-        }
     }
 }

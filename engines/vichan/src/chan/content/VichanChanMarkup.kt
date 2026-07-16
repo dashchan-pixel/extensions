@@ -2,11 +2,9 @@ package chan.content
 
 import android.util.Pair
 import chan.text.CommentEditor
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 open class VichanChanMarkup : ChanMarkup() {
-
     init {
         addTag("strong", TAG_BOLD)
         addTag("em", TAG_ITALIC)
@@ -21,12 +19,12 @@ open class VichanChanMarkup : ChanMarkup() {
         return commentEditor
     }
 
-    override fun isTagSupported(boardName: String?, tag: Int): Boolean {
-        return (SUPPORTED_TAGS and tag) == tag
-    }
+    override fun isTagSupported(
+        boardName: String?,
+        tag: Int,
+    ): Boolean = (SUPPORTED_TAGS and tag) == tag
 
-    override fun obtainPostLinkThreadPostNumbers(uriString: String?): Pair<String?, String?>? {
-        if (uriString == null) return null
+    override fun obtainPostLinkThreadPostNumbers(uriString: String): Pair<String?, String?>? {
         val matcher = THREAD_LINK.matcher(uriString)
         if (matcher.find()) {
             return Pair(matcher.group(1), matcher.group(2))

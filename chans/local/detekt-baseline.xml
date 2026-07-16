@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-capcode")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-comment")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-default-name")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-email")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-file")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-files")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-height")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-icon")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-identifier")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-name")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-number")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-op")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-original-name")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-posts")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-sage")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-size")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-subject")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-thread-uri")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-thumbnail")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-timestamp")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-tripcode")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("data-width")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("src")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:LocalPostsParser.kt$LocalPostsParser$attributes.get("title")</ID>
+    <ID>LongMethod:LocalPostsParser.kt$LocalPostsParser$@Throws(OriginalPostParsedException::class) override fun onStartElement( parser: GroupParser, tagName: String, attributes: GroupParser.Attributes, ): Boolean</ID>
+    <ID>SwallowedException:LocalPostsParser.kt$LocalPostsParser$e: OriginalPostParsedException</ID>
+    <ID>SwallowedException:UriHandlerActivity.kt$UriHandlerActivity$e: ActivityNotFoundException</ID>
+    <ID>VarCouldBeVal:LocalChanPerformer.kt$LocalChanPerformer$var current = 0</ID>
+  </CurrentIssues>
+</SmellBaseline>

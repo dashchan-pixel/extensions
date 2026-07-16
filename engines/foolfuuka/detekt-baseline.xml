@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>DoubleMutabilityForCollection:FoolFuukaPostsParser.kt$FoolFuukaPostsParser$private var threads: ArrayList&lt;Posts&gt;? = null</ID>
+  </CurrentIssues>
+</SmellBaseline>

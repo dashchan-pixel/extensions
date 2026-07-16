@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>DoubleMutabilityForCollection:VichanChanPerformer.kt$VichanChanPerformer$var boards = boardsMap[category]</ID>
+    <ID>ExplicitCollectionElementAccessMethod:VichanAntispamParser.kt$VichanAntispamParser.Companion$attributes.get("name")</ID>
+    <ID>ExplicitCollectionElementAccessMethod:VichanAntispamParser.kt$VichanAntispamParser.Companion$attributes.get("value")</ID>
+    <ID>LongMethod:VichanChanPerformer.kt$VichanChanPerformer$@Throws(HttpException::class, ApiException::class, InvalidResponseException::class) override fun onSendPost(data: SendPostData): SendPostResult</ID>
+    <ID>LongMethod:VichanChanPerformer.kt$VichanChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadThreads(data: ReadThreadsData): ReadThreadsResult</ID>
+    <ID>LongMethod:VichanModelMapper.kt$VichanModelMapper.Companion$@JvmStatic @Throws(IOException::class, ParseException::class) fun createPost( reader: JsonSerial.Reader, locator: VichanChanLocator, boardName: String?, extra: Extra?, ): Post</ID>
+    <ID>LongParameterList:VichanModelMapper.kt$VichanModelMapper.Companion$( locator: VichanChanLocator, boardName: String?, tim: String?, ext: String?, filename: String?, size: Int, width: Int, height: Int, )</ID>
+    <ID>MayBeConst:VichanChanConfiguration.kt$VichanChanConfiguration.Companion$@JvmField val DEFAULT_BOARD_CATEGORY: String = "Boards"</ID>
+    <ID>MayBeConst:VichanChanLocator.kt$VichanChanLocator.Companion$@JvmField val DEFAULT_SEGMENT_PRESET: String = ""</ID>
+    <ID>NullableToStringCall:VichanChanLocator.kt$VichanChanLocator$$ext</ID>
+    <ID>NullableToStringCall:VichanChanLocator.kt$VichanChanLocator$$tim</ID>
+    <ID>NullableToStringCall:VichanModelMapper.kt$VichanModelMapper.Companion$$ext</ID>
+    <ID>NullableToStringCall:VichanModelMapper.kt$VichanModelMapper.Companion$$tim</ID>
+    <ID>SwallowedException:VichanChanPerformer.kt$VichanChanPerformer$e: HttpException</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,7 +1,6 @@
 package chan.content
 
 open class VichanChanConfiguration : ChanConfiguration() {
-
     init {
         setDefaultName("Anonymous")
     }
@@ -15,7 +14,10 @@ open class VichanChanConfiguration : ChanConfiguration() {
         return board
     }
 
-    override fun obtainPostingConfiguration(boardName: String?, newThread: Boolean): Posting {
+    override fun obtainPostingConfiguration(
+        boardName: String?,
+        newThread: Boolean,
+    ): Posting {
         val posting = Posting()
         posting.allowName = true
         posting.allowTripcode = true
@@ -45,9 +47,7 @@ open class VichanChanConfiguration : ChanConfiguration() {
         return reporting
     }
 
-    open fun getDefaultBoardCategory(): String {
-        return DEFAULT_BOARD_CATEGORY
-    }
+    open fun getDefaultBoardCategory(): String = DEFAULT_BOARD_CATEGORY
 
     companion object {
         @JvmField

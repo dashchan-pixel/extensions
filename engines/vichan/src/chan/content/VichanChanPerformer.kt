@@ -7,7 +7,6 @@ import chan.content.model.Post
 import chan.content.model.Posts
 import chan.http.HttpException
 import chan.http.HttpRequest
-import chan.http.HttpResponse
 import chan.http.HttpValidator
 import chan.http.MultipartEntity
 import chan.http.UrlEncodedEntity
@@ -19,24 +18,24 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
-import java.io.InputStream
 import java.util.ArrayList
 import java.util.HashMap
 
 open class VichanChanPerformer : ChanPerformer() {
-
     @Throws(HttpException::class, InvalidResponseException::class)
-    override fun onReadBoards(data: ReadBoardsData?): ReadBoardsResult {
-        val requireData = requireNotNull(data)
+    override fun onReadBoards(data: ReadBoardsData): ReadBoardsResult {
+        val requireData = data
         val configuration = ChanConfiguration.get(this) as VichanChanConfiguration
         val locator = ChanLocator.get(this) as VichanChanLocator
         val uri = locator.createBoardsUri()
 
         var jsonArray: JSONArray? = null
         try {
-            val value = HttpRequest(uri, requireData)
-                .setGetMethod()
-                .perform().readString()
+            val value =
+                HttpRequest(uri, requireData)
+                    .setGetMethod()
+                    .perform()
+                    .readString()
             jsonArray = JSONArray(value)
         } catch (e: HttpException) {
             throw HttpException(e.responseCode, e.message)
@@ -66,7 +65,8 @@ open class VichanChanPerformer : ChanPerformer() {
                     }
                 }
 
-                if (!StringUtils.isEmpty(category) && !StringUtils.isEmpty(boardName) &&
+                if (!StringUtils.isEmpty(category) &&
+                    !StringUtils.isEmpty(boardName) &&
                     !StringUtils.isEmpty(title)
                 ) {
                     var boards = boardsMap[category]
@@ -92,8 +92,8 @@ open class VichanChanPerformer : ChanPerformer() {
     }
 
     @Throws(HttpException::class, InvalidResponseException::class)
-    override fun onReadThreads(data: ReadThreadsData?): ReadThreadsResult {
-        val requireData = requireNotNull(data)
+    override fun onReadThreads(data: ReadThreadsData): ReadThreadsResult {
+        val requireData = data
         val locator = ChanLocator.get(this) as VichanChanLocator
         val uri = locator.createThreadsUri(requireData.boardName, requireData.pageNumber, requireData.isCatalog)
         val response = HttpRequest(uri, requireData).setValidator(requireData.validator).perform()
@@ -114,8 +114,10 @@ open class VichanChanPerformer : ChanPerformer() {
                                             threads.add(
                                                 VichanModelMapper.createThread(
                                                     reader,
-                                                    locator, requireData.boardName, true
-                                                )
+                                                    locator,
+                                                    requireData.boardName,
+                                                    true,
+                                                ),
                                             )
                                         }
                                     }
@@ -135,8 +137,10 @@ open class VichanChanPerformer : ChanPerformer() {
                                         threads.add(
                                             VichanModelMapper.createThread(
                                                 reader,
-                                                locator, requireData.boardName, false
-                                            )
+                                                locator,
+                                                requireData.boardName,
+                                                false,
+                                            ),
                                         )
                                     }
                                 }
@@ -157,8 +161,8 @@ open class VichanChanPerformer : ChanPerformer() {
     }
 
     @Throws(HttpException::class, InvalidResponseException::class)
-    override fun onReadPosts(data: ReadPostsData?): ReadPostsResult {
-        val requireData = requireNotNull(data)
+    override fun onReadPosts(data: ReadPostsData): ReadPostsResult {
+        val requireData = data
         val locator = ChanLocator.get(this) as VichanChanLocator
         val uri = locator.createThreadUri(requireData.boardName, requireData.threadNumber)
         val posts = ArrayList<Post>()
@@ -176,8 +180,10 @@ open class VichanChanPerformer : ChanPerformer() {
                                     posts.add(
                                         VichanModelMapper.createPost(
                                             reader,
-                                            locator, requireData.boardName, extra
-                                        )
+                                            locator,
+                                            requireData.boardName,
+                                            extra,
+                                        ),
                                     )
                                     if (extra != null) {
                                         extra = null
@@ -200,12 +206,15 @@ open class VichanChanPerformer : ChanPerformer() {
     }
 
     @Throws(ParseException::class)
-    open fun parseAntispamFields(text: String?, entity: MultipartEntity?) {
+    open fun parseAntispamFields(
+        text: String?,
+        entity: MultipartEntity?,
+    ) {
     }
 
     @Throws(HttpException::class, ApiException::class, InvalidResponseException::class)
-    override fun onSendPost(data: SendPostData?): SendPostResult {
-        val requireData = requireNotNull(data)
+    override fun onSendPost(data: SendPostData): SendPostResult {
+        val requireData = data
         val entity = MultipartEntity()
         entity.add("board", requireData.boardName)
         entity.add("thread", requireData.threadNumber)
@@ -215,9 +224,10 @@ open class VichanChanPerformer : ChanPerformer() {
         entity.add("body", StringUtils.emptyIfNull(requireData.comment))
         entity.add("password", requireData.password)
         var spoiler = false
-        if (requireData.attachments != null) {
-            for (i in requireData.attachments.indices) {
-                val attachment: SendPostData.Attachment = requireData.attachments[i]
+        val attachments = requireData.attachments
+        if (attachments != null) {
+            for (i in attachments.indices) {
+                val attachment: SendPostData.Attachment = attachments[i]
                 attachment.addToEntity(entity, "file" + if (i > 0) Integer.toString(i + 1) else "")
                 if (attachment.optionSpoiler) {
                     spoiler = true
@@ -241,18 +251,18 @@ open class VichanChanPerformer : ChanPerformer() {
         var uri: Uri? = locator.buildPath("vichan", "post.php")
         var jsonObject: JSONObject? = null
         try {
-            jsonObject = JSONObject(
-                HttpRequest(uri, requireData).setPostMethod(entity)
-                    .addHeader("Referer", locator.buildPath().toString())
-                    .setRedirectHandler(HttpRequest.RedirectHandler.STRICT).perform().readString()
-            )
+            jsonObject =
+                JSONObject(
+                    HttpRequest(uri, requireData)
+                        .setPostMethod(entity)
+                        .addHeader("Referer", locator.buildPath().toString())
+                        .setRedirectHandler(HttpRequest.RedirectHandler.STRICT)
+                        .perform()
+                        .readString(),
+                )
         } catch (e: JSONException) {
             throw InvalidResponseException(e)
         }
-        if (jsonObject == null) {
-            throw InvalidResponseException()
-        }
-
         val redirect = jsonObject.optString("redirect")
         if (!StringUtils.isEmpty(redirect)) {
             uri = locator.buildPath(redirect)
@@ -260,8 +270,8 @@ open class VichanChanPerformer : ChanPerformer() {
             val postNumber = locator.getPostNumber(uri)
             return SendPostResult(threadNumber, postNumber)
         }
-        val errorMessage = jsonObject.optString("error", null)
-        if (errorMessage != null) {
+        val errorMessage = jsonObject.optString("error", "")
+        if (errorMessage.isNotEmpty()) {
             var errorType = 0
             if (errorMessage.contains("The body was") || errorMessage.contains("must be at least")) {
                 errorType = ApiException.SEND_ERROR_EMPTY_COMMENT
@@ -299,13 +309,20 @@ open class VichanChanPerformer : ChanPerformer() {
     }
 
     @Throws(HttpException::class, ApiException::class, InvalidResponseException::class)
-    override fun onSendDeletePosts(data: SendDeletePostsData?): SendDeletePostsResult? {
-        val requireData = requireNotNull(data)
+    override fun onSendDeletePosts(data: SendDeletePostsData): SendDeletePostsResult? {
+        val requireData = data
         val locator = ChanLocator.get(this) as VichanChanLocator
-        val entity = UrlEncodedEntity(
-            "delete", "1", "board", requireData.boardName,
-            "password", requireData.password, "json_response", "1"
-        )
+        val entity =
+            UrlEncodedEntity(
+                "delete",
+                "1",
+                "board",
+                requireData.boardName,
+                "password",
+                requireData.password,
+                "json_response",
+                "1",
+            )
         for (postNumber in requireData.postNumbers) {
             entity.add("delete_$postNumber", "1")
         }
@@ -315,21 +332,22 @@ open class VichanChanPerformer : ChanPerformer() {
         val uri: Uri? = locator.buildPath("vichan", "post.php")
         var jsonObject: JSONObject? = null
         try {
-            jsonObject = JSONObject(
-                HttpRequest(uri, requireData).setPostMethod(entity)
-                    .setRedirectHandler(HttpRequest.RedirectHandler.STRICT).perform().readString()
-            )
+            jsonObject =
+                JSONObject(
+                    HttpRequest(uri, requireData)
+                        .setPostMethod(entity)
+                        .setRedirectHandler(HttpRequest.RedirectHandler.STRICT)
+                        .perform()
+                        .readString(),
+                )
         } catch (e: JSONException) {
             throw InvalidResponseException(e)
-        }
-        if (jsonObject == null) {
-            throw InvalidResponseException()
         }
         if (jsonObject.optBoolean("success")) {
             return null
         }
-        val errorMessage = jsonObject.optString("error", null)
-        if (errorMessage != null) {
+        val errorMessage = jsonObject.optString("error", "")
+        if (errorMessage.isNotEmpty()) {
             var errorType = 0
             if (errorMessage.contains("Wrong password")) {
                 errorType = ApiException.DELETE_ERROR_PASSWORD
@@ -346,34 +364,42 @@ open class VichanChanPerformer : ChanPerformer() {
     }
 
     @Throws(HttpException::class, ApiException::class, InvalidResponseException::class)
-    override fun onSendReportPosts(data: SendReportPostsData?): SendReportPostsResult? {
-        val requireData = requireNotNull(data)
+    override fun onSendReportPosts(data: SendReportPostsData): SendReportPostsResult? {
+        val requireData = data
         val locator = ChanLocator.get(this) as VichanChanLocator
-        val entity = UrlEncodedEntity(
-            "report", "1", "board", requireData.boardName,
-            "reason", StringUtils.emptyIfNull(requireData.comment), "json_response", "1"
-        )
+        val entity =
+            UrlEncodedEntity(
+                "report",
+                "1",
+                "board",
+                requireData.boardName,
+                "reason",
+                StringUtils.emptyIfNull(requireData.comment),
+                "json_response",
+                "1",
+            )
         for (postNumber in requireData.postNumbers) {
             entity.add("delete_$postNumber", "1")
         }
         val uri: Uri? = locator.buildPath("vichan", "post.php")
         var jsonObject: JSONObject? = null
         try {
-            jsonObject = JSONObject(
-                HttpRequest(uri, requireData).setPostMethod(entity)
-                    .setRedirectHandler(HttpRequest.RedirectHandler.STRICT).perform().readString()
-            )
+            jsonObject =
+                JSONObject(
+                    HttpRequest(uri, requireData)
+                        .setPostMethod(entity)
+                        .setRedirectHandler(HttpRequest.RedirectHandler.STRICT)
+                        .perform()
+                        .readString(),
+                )
         } catch (e: JSONException) {
             throw InvalidResponseException(e)
-        }
-        if (jsonObject == null) {
-            throw InvalidResponseException()
         }
         if (jsonObject.optBoolean("success")) {
             return null
         }
-        val errorMessage = jsonObject.optString("error", null)
-        if (errorMessage != null) {
+        val errorMessage = jsonObject.optString("error", "")
+        if (errorMessage.isNotEmpty()) {
             CommonUtils.writeLog("Report message", errorMessage)
             throw ApiException(errorMessage)
         }

@@ -11,7 +11,10 @@ interface PostsParser {
     fun convertThreads(input: InputStream): ArrayList<Posts>
 
     @Throws(IOException::class, ParseException::class)
-    fun convertPosts(input: InputStream, threadUri: Uri?): Posts?
+    fun convertPosts(
+        input: InputStream,
+        threadUri: Uri?,
+    ): Posts?
 
     @Throws(IOException::class, ParseException::class)
     fun convertSearch(input: InputStream): ArrayList<Post>

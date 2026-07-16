@@ -1,13 +1,13 @@
 plugins {
-	id("chan-extension")
+    id("chan-extension")
 }
 
 chan {
-	versionName = "26.7"
-	apiVersion = 1
-	hosts("2ch.org", "2ch.su", "2ch.life", "2ch.hk")
+    versionName = "26.7"
+    apiVersion = 1
+    hosts("2ch.org", "2ch.su", "2ch.life", "2ch.hk")
 }
 
 dependencies {
-	implementation("org.jsoup:jsoup:1.21.2")
+    implementation("org.jsoup:jsoup:1.21.2")
 }

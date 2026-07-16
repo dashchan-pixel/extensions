@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CanBeNonNullable:ThreadsWithTailCache.kt$ThreadsWithTailCache$threadNumber: String?</ID>
+    <ID>DoubleMutabilityForCollection:FourchanChanPerformer.kt$FourchanChanPerformer$var boards = boardsMap[category]</ID>
+    <ID>DoubleMutabilityForCollection:FourchanModelMapper.kt$FourchanModelMapper.Extra$var lastReplies: ArrayList&lt;Post&gt;? = null</ID>
+    <ID>ExplicitCollectionElementAccessMethod:FourchanChanPerformer.kt$FourchanChanPerformer$captchaData.get(CAPTCHA_DATA_KEY_PASS_COOKIE)</ID>
+    <ID>ExplicitCollectionElementAccessMethod:FourchanChanPerformer.kt$FourchanChanPerformer$captchaData.get(CAPTCHA_DATA_KEY_TYPE)</ID>
+    <ID>ExplicitCollectionElementAccessMethod:FourchanChanPerformer.kt$FourchanChanPerformer$captchaData.get(CaptchaData.CHALLENGE)</ID>
+    <ID>ExplicitCollectionElementAccessMethod:FourchanChanPerformer.kt$FourchanChanPerformer$captchaData.get(CaptchaData.INPUT)</ID>
+    <ID>InstanceOfCheckForException:FourchanChanPerformer.kt$FourchanChanPerformer$e is HttpException</ID>
+    <ID>LongMethod:FourchanChanConfiguration.kt$FourchanChanConfiguration$@Throws(IOException::class, ParseException::class) fun updateBoard(reader: JsonSerial.Reader): chan.content.model.Board?</ID>
+    <ID>LongMethod:FourchanChanPerformer.kt$FourchanChanPerformer$@Throws(HttpException::class, ApiException::class, InvalidResponseException::class) override fun onSendPost(data: SendPostData): SendPostResult</ID>
+    <ID>LongMethod:FourchanChanPerformer.kt$FourchanChanPerformer$@Throws(HttpException::class, ApiException::class, InvalidResponseException::class) override fun onSendReportPosts(data: SendReportPostsData): SendReportPostsResult?</ID>
+    <ID>LongMethod:FourchanChanPerformer.kt$FourchanChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadBoards(data: ReadBoardsData): ReadBoardsResult</ID>
+    <ID>LongMethod:FourchanChanPerformer.kt$FourchanChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadCaptcha(data: ReadCaptchaData): ReadCaptchaResult</ID>
+    <ID>LongMethod:FourchanChanPerformer.kt$FourchanChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadPosts(data: ReadPostsData): ReadPostsResult</ID>
+    <ID>LongMethod:FourchanChanPerformer.kt$FourchanChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadSearchPosts(data: ReadSearchPostsData): ReadSearchPostsResult</ID>
+    <ID>LongMethod:FourchanChanPerformer.kt$FourchanChanPerformer.FourchanSpurResolver.Exclusive$override fun resolve( session: FirewallResolver.Session, key: FirewallResolver.Exclusive.Key, ): Boolean</ID>
+    <ID>LongMethod:FourchanModelMapper.kt$FourchanModelMapper$@JvmStatic @Throws(IOException::class, ParseException::class) fun createPost( reader: JsonSerial.Reader, locator: FourchanChanLocator, boardName: String, handleMathTags: Boolean, extra: Extra?, ): Post</ID>
+    <ID>NullableToStringCall:FourchanChanPerformer.kt$FourchanChanPerformer$$responseStr</ID>
+    <ID>ThrowingExceptionsWithoutMessageOrCause:FourchanCaptchaUtils.kt$FourchanCaptchaUtils$IllegalStateException()</ID>
+    <ID>ThrowingExceptionsWithoutMessageOrCause:FourchanChanPerformer.kt$FourchanChanPerformer$IllegalStateException()</ID>
+    <ID>TooGenericExceptionThrown:FourchanChanConfiguration.kt$FourchanChanConfiguration$throw RuntimeException(e)</ID>
+    <ID>TooGenericExceptionThrown:FourchanChanLocator.kt$FourchanChanLocator$throw RuntimeException(e)</ID>
+    <ID>TooGenericExceptionThrown:ReportReason.kt$ReportReason$throw RuntimeException(e)</ID>
+    <ID>TooGenericExceptionThrown:ReportReason.kt$ReportReason.Companion$throw RuntimeException(e)</ID>
+    <ID>UseCheckOrError:FourchanCaptchaUtils.kt$FourchanCaptchaUtils$throw IllegalStateException()</ID>
+    <ID>UseCheckOrError:FourchanChanPerformer.kt$FourchanChanPerformer$throw IllegalStateException()</ID>
+    <ID>UseOrEmpty:FourchanChanPerformer.kt$FourchanChanPerformer.Companion$message ?: ""</ID>
+  </CurrentIssues>
+</SmellBaseline>

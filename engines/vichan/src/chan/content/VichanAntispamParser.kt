@@ -12,7 +12,7 @@ import java.util.HashSet
 open class VichanAntispamParser private constructor(
     source: String?,
     entity: RequestEntity,
-    vararg ignoreFields: String
+    vararg ignoreFields: String,
 ) {
     private val ignoreFields = HashSet<String>()
     private val fields = ArrayList<Pair<String?, String?>>()
@@ -31,39 +31,49 @@ open class VichanAntispamParser private constructor(
     companion object {
         @JvmStatic
         @Throws(ParseException::class)
-        fun parseAndApply(source: String?, entity: RequestEntity, vararg ignoreFields: String) {
+        fun parseAndApply(
+            source: String?,
+            entity: RequestEntity,
+            vararg ignoreFields: String,
+        ) {
             VichanAntispamParser(source, entity, *ignoreFields)
         }
 
-        private val PARSER: TemplateParser<VichanAntispamParser> = TemplateParser.builder<VichanAntispamParser>()
-            .equals("form", "name", "post").open { instance, holder, tagName, attributes ->
-                holder.formParsing = true
-                false
-            }.name("input").open { instance, holder, tagName, attributes ->
-                if (holder.formParsing) {
-                    val name = attributes.get("name")
-                    if (!holder.ignoreFields.contains(name)) {
-                        val value = StringUtils.unescapeHtml(attributes.get("value"))
-                        holder.fields.add(Pair(name, value))
+        private val PARSER: TemplateParser<VichanAntispamParser> =
+            TemplateParser
+                .builder<VichanAntispamParser>()
+                .equals("form", "name", "post")
+                .open { instance, holder, tagName, attributes ->
+                    holder.formParsing = true
+                    false
+                }.name("input")
+                .open { instance, holder, tagName, attributes ->
+                    if (holder.formParsing) {
+                        val name = attributes.get("name")
+                        if (!holder.ignoreFields.contains(name)) {
+                            val value = StringUtils.unescapeHtml(attributes.get("value"))
+                            holder.fields.add(Pair(name, value))
+                        }
                     }
-                }
-                false
-            }.name("textarea").open { instance, holder, tagName, attributes ->
-                if (holder.formParsing) {
-                    val name = attributes.get("name")
-                    if (!holder.ignoreFields.contains(name)) {
-                        holder.fieldName = name
-                        return@open true
+                    false
+                }.name("textarea")
+                .open { instance, holder, tagName, attributes ->
+                    if (holder.formParsing) {
+                        val name = attributes.get("name")
+                        if (!holder.ignoreFields.contains(name)) {
+                            holder.fieldName = name
+                            return@open true
+                        }
                     }
-                }
-                false
-            }.content { instance, holder, text ->
-                val value = StringUtils.unescapeHtml(text)
-                holder.fields.add(Pair(holder.fieldName, value))
-            }.name("form").close { instance, holder, tagName ->
-                if (holder.formParsing) {
-                    instance.finish()
-                }
-            }.prepare()
+                    false
+                }.content { instance, holder, text ->
+                    val value = StringUtils.unescapeHtml(text)
+                    holder.fields.add(Pair(holder.fieldName, value))
+                }.name("form")
+                .close { instance, holder, tagName ->
+                    if (holder.formParsing) {
+                        instance.finish()
+                    }
+                }.prepare()
     }
 }

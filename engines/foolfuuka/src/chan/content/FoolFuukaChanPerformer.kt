@@ -1,6 +1,5 @@
 package chan.content
 
-import android.net.Uri
 import chan.content.model.BoardsParser
 import chan.content.model.PostsParser
 import chan.http.HttpException
@@ -63,8 +62,13 @@ open class FoolFuukaChanPerformer : ChanPerformer() {
     @Throws(HttpException::class, InvalidResponseException::class)
     override fun onReadSearchPosts(data: ReadSearchPostsData): ReadSearchPostsResult {
         val locator = ChanLocator.get(this) as FoolFuukaChanLocator
-        val uri = locator.buildPath(data.boardName, "search", "text").buildUpon().appendPath(data.searchQuery)
-            .appendEncodedPath("page/" + (data.pageNumber + 1) + "/").build()
+        val uri =
+            locator
+                .buildPath(data.boardName, "search", "text")
+                .buildUpon()
+                .appendPath(data.searchQuery)
+                .appendEncodedPath("page/" + (data.pageNumber + 1) + "/")
+                .build()
         val response = HttpRequest(uri, data).perform()
         try {
             response.open().use { input ->
@@ -96,9 +100,9 @@ open class FoolFuukaChanPerformer : ChanPerformer() {
         }
     }
 
-    open protected fun getPostsParser(): PostsParser = FoolFuukaPostsParser(this)
+    protected open fun getPostsParser(): PostsParser = FoolFuukaPostsParser(this)
 
-    open protected fun getBoardsParser(): BoardsParser = FoolFuukaBoardsParser()
+    protected open fun getBoardsParser(): BoardsParser = FoolFuukaBoardsParser()
 
     companion object {
         private val PATTERN_REDIRECT = Pattern.compile("You are being redirected to .*?/thread/(\\d+)/#")

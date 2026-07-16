@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CanBeNonNullable:DvachChanConfiguration.kt$DvachChanConfiguration$value: Boolean?</ID>
+    <ID>CanBeNonNullable:DvachChanPerformer.kt$DvachChanPerformer$reason: String?</ID>
+    <ID>CanBeNonNullable:DvachModelMapper.kt$DvachModelMapper$path: String?</ID>
+    <ID>ExplicitCollectionElementAccessMethod:DvachChanPerformer.kt$DvachChanPerformer$captchaData.get(CAPTCHA_PASS_COOKIE)</ID>
+    <ID>ExplicitCollectionElementAccessMethod:DvachChanPerformer.kt$DvachChanPerformer$captchaData.get(CaptchaData.CHALLENGE)</ID>
+    <ID>ExplicitCollectionElementAccessMethod:DvachChanPerformer.kt$DvachChanPerformer$captchaData.get(CaptchaData.INPUT)</ID>
+    <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws( IOException::class, ParseException::class, HttpException::class, InvalidResponseException::class, RedirectException::class, ) private fun parsePostsResponse( reader: JsonSerial.Reader, data: ReadPostsData, usePartialApi: Boolean, archive: Boolean, archiveDate: String?, ): Posts</ID>
+    <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws(HttpException::class, ApiException::class, InvalidResponseException::class) override fun onSendPost(data: SendPostData): SendPostResult</ID>
+    <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadSearchPosts(data: ReadSearchPostsData): ReadSearchPostsResult</ID>
+    <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadThreadSummaries(data: ReadThreadSummariesData): ReadThreadSummariesResult</ID>
+    <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadThreads(data: ReadThreadsData): ReadThreadsResult</ID>
+    <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) private fun onReadCaptcha( data: ReadCaptchaData, captchaPassData: String?, mayUseLastCaptchaPassCookie: Boolean, ): ReadCaptchaResult</ID>
+    <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws(HttpException::class, InvalidResponseException::class, RedirectException::class) private fun onReadPosts( data: ReadPostsData, usePartialApi: Boolean, archive: Boolean, ): Posts</ID>
+    <ID>LongMethod:DvachModelMapper.kt$DvachModelMapper$@JvmStatic @Throws(IOException::class, ParseException::class) fun createPost( reader: JsonSerial.Reader, linked: Any, boardName: String, archiveDate: String?, sageEnabled: Boolean, extra: Extra?, ): Post</ID>
+    <ID>LongMethod:DvachModelMapper.kt$DvachModelMapper$@JvmStatic @Throws(IOException::class, ParseException::class) fun createWakabaArchivePost( reader: JsonSerial.Reader, linked: Any, boardName: String, ): Post</ID>
+    <ID>NullableToStringCall:DvachChanPerformer.kt$DvachChanPerformer$$threadNumber</ID>
+    <ID>NullableToStringCall:DvachChanPerformer.kt$DvachChanPerformer$${data.threadNumber}</ID>
+    <ID>NullableToStringCall:DvachModelMapper.kt$DvachModelMapper$$subject</ID>
+    <ID>NullableToStringCall:DvachModelMapper.kt$DvachModelMapper$$tags</ID>
+    <ID>SwallowedException:DvachChanConfiguration.kt$DvachChanConfiguration$e: Exception</ID>
+    <ID>SwallowedException:DvachChanPerformer.kt$DvachChanPerformer$e: HttpException</ID>
+    <ID>SwallowedException:DvachFirewallResolver.kt$DvachFirewallResolver.WebViewClient$e: Exception</ID>
+    <ID>ThrowingExceptionsWithoutMessageOrCause:DvachChanPerformer.kt$DvachChanPerformer$RuntimeException()</ID>
+    <ID>TooGenericExceptionThrown:DvachChanPerformer.kt$DvachChanPerformer$throw RuntimeException()</ID>
+    <ID>TooGenericExceptionThrown:DvachEmojiCaptchaProvider.kt$DvachEmojiCaptchaProvider$throw RuntimeException(ex.message)</ID>
+    <ID>UseOrEmpty:DvachChanPerformer.kt$DvachChanPerformer$captchaPassCookie ?: ""</ID>
+    <ID>UseOrEmpty:DvachChanPerformer.kt$DvachChanPerformer$reason ?: ""</ID>
+    <ID>UseOrEmpty:DvachChanPerformer.kt$DvachChanPerformer$subject ?: ""</ID>
+  </CurrentIssues>
+</SmellBaseline>

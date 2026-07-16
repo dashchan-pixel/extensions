@@ -22,27 +22,26 @@ open class FoolFuukaBoardsParser : BoardsParser {
     }
 
     companion object {
-        private val PARSER: TemplateParser<FoolFuukaBoardsParser> = TemplateParser
-            .builder<FoolFuukaBoardsParser>()
-            .name("h2")
-            .content { instance, holder, text ->
-                if ("Archives" == text) {
-                    holder.boardCategoryTitle = StringUtils.clearHtml(text)
-                } else {
-                    holder.boardCategoryTitle = null
-                }
-            }
-            .name("a")
-            .open { i, h, t, a -> h.boardCategoryTitle != null }
-            .content { instance, holder, text ->
-                val cleanText = StringUtils.clearHtml(text).substring(1)
-                val index = cleanText.indexOf('/')
-                if (index >= 0) {
-                    val boardName = cleanText.substring(0, index)
-                    val title = cleanText.substring(index + 2)
-                    holder.boards.add(Board(boardName, title))
-                }
-            }
-            .prepare()
+        private val PARSER: TemplateParser<FoolFuukaBoardsParser> =
+            TemplateParser
+                .builder<FoolFuukaBoardsParser>()
+                .name("h2")
+                .content { instance, holder, text ->
+                    if ("Archives" == text) {
+                        holder.boardCategoryTitle = StringUtils.clearHtml(text)
+                    } else {
+                        holder.boardCategoryTitle = null
+                    }
+                }.name("a")
+                .open { i, h, t, a -> h.boardCategoryTitle != null }
+                .content { instance, holder, text ->
+                    val cleanText = StringUtils.clearHtml(text).substring(1)
+                    val index = cleanText.indexOf('/')
+                    if (index >= 0) {
+                        val boardName = cleanText.substring(0, index)
+                        val title = cleanText.substring(index + 2)
+                        holder.boards.add(Board(boardName, title))
+                    }
+                }.prepare()
     }
 }
