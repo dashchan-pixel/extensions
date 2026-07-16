@@ -1,8 +1,8 @@
-name: Dashchan-Dvach build
+name: Dashchan Extensions Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "rework", "master" ]
     
 env:
   KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
