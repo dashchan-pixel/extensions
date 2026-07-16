@@ -3,8 +3,6 @@ name: Dashchan-Dvach build
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
     
 env:
   KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
