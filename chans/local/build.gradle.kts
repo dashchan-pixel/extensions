@@ -3,7 +3,7 @@ plugins {
 }
 
 chan {
-	versionName = "1.9"
+	versionName = "26.7"
 	apiVersion = 1
 	hosts("localhost")
 	customUriHandler = true

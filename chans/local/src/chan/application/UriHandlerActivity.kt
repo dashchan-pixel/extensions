@@ -18,6 +18,7 @@ class UriHandlerActivity : Activity() {
 				val directory = segments[segments.size - 2]
 				if (directory == "Archive") {
 					val origin = segments[segments.size - 1]
+					// Internal synthetic URI used by LocalChanPerformer customUriHandler for local resources
 					val handleIntent = Intent(ACTION).setData(Uri.parse("http://localhost/null/res/$origin"))
 					intent.extras?.let { handleIntent.putExtras(it) }
 					try {

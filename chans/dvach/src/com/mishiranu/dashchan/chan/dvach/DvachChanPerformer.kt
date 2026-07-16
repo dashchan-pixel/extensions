@@ -39,7 +39,7 @@ class DvachChanPerformer : ChanPerformer() {
 		try {
 			registerFirewallResolver(DvachFirewallResolver())
 		} catch (e: LinkageError) {
-			e.printStackTrace()
+			chan.util.CommonUtils.writeLog("Dvach init", e)
 		}
 	}
 
@@ -940,7 +940,7 @@ class DvachChanPerformer : ChanPerformer() {
 				val banExpireDate = StringUtils.emptyIfNull(matcher.group(3))
 				if (!StringUtils.isEmpty(banExpireDate)) {
 					try {
-						banExtra.setExpireDate(DATE_FORMAT_BAN.parse(banExpireDate)!!.time)
+						banExtra.setExpireDate(DATE_FORMAT_BAN.get()!!.parse(banExpireDate)!!.time)
 					} catch (e: java.text.ParseException) {
 						// Ignore exception
 					}
@@ -1057,13 +1057,17 @@ class DvachChanPerformer : ChanPerformer() {
 		private val PATTERN_BAN = Pattern.compile("[^ ]*?: (\\d+)\\. .*: (.*(?=//![a-z]+\\.)|" +
 				".*(?=[А-Я][а-я]{2} [А-Я][а-я]{2} \\d{2} (?:\\d{2}:?){3} \\d{4}$)|.*$)(?:.*?[а-я] )?([А-Я].*|)")
 
-		@SuppressLint("SimpleDateFormat")
-		private val DATE_FORMAT_BAN = SimpleDateFormat("MMM dd HH:mm:ss yyyy",
-				DateFormatSymbols().apply {
-					shortMonths = arrayOf("Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг",
-							"Сен", "Окт", "Ноя", "Дек")
-				}).apply {
-			timeZone = TimeZone.getTimeZone("GMT+3")
+		private val DATE_FORMAT_BAN = object : ThreadLocal<SimpleDateFormat>() {
+			@SuppressLint("SimpleDateFormat")
+			override fun initialValue(): SimpleDateFormat {
+				return SimpleDateFormat("MMM dd HH:mm:ss yyyy",
+						DateFormatSymbols().apply {
+							shortMonths = arrayOf("Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг",
+									"Сен", "Окт", "Ноя", "Дек")
+						}).apply {
+					timeZone = TimeZone.getTimeZone("GMT+3")
+				}
+			}
 		}
 
 		private fun makeCaptchaPassResult(captchaPassCookie: String?): ReadCaptchaResult {

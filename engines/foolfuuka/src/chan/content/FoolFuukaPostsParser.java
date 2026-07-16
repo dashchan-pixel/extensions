@@ -30,7 +30,12 @@ public class FoolFuukaPostsParser implements PostsParser {
 	private ArrayList<Posts> threads;
 	private final ArrayList<Post> posts = new ArrayList<>();
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZZZZZ", Locale.US);
+	private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+		@Override
+		protected SimpleDateFormat initialValue() {
+			return new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZZZZZ", Locale.US);
+		}
+	};
 	private static final Pattern PATTERN_FILE = Pattern.compile("(?:(.*), )?(\\d+)(\\w+), (\\d+)x(\\d+)(?:, (.*))?");
 
 	public FoolFuukaPostsParser(Object linked) {
@@ -112,7 +117,7 @@ public class FoolFuukaPostsParser implements PostsParser {
 			.name("time")
 			.open((instance, holder, tagName, attributes) -> {
 				try {
-					holder.post.setTimestamp(Objects.requireNonNull(DATE_FORMAT.parse(StringUtils
+					holder.post.setTimestamp(Objects.requireNonNull(DATE_FORMAT.get().parse(StringUtils
 							.emptyIfNull(attributes.get("datetime")))).getTime());
 				} catch (java.text.ParseException e) {
 					// Ignore exception

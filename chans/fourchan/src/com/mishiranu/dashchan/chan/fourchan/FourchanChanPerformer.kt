@@ -1092,7 +1092,7 @@ class FourchanChanPerformer : ChanPerformer() {
 							session.getChanConfiguration<ChanConfiguration>()?.storeCookie("fourchan_captcha_json", responseJson, null)
 						}
 					} catch (e: Exception) {
-						e.printStackTrace()
+						chan.util.CommonUtils.writeLog("4chan captcha json", e)
 					}
 				}
 				return false
@@ -1113,7 +1113,11 @@ class FourchanChanPerformer : ChanPerformer() {
 
 		private const val CAPTCHA_TICKET_KEY = "captcha_ticket"
 
-		private val DATE_FORMAT_BAN = SimpleDateFormat("MMMM d yyyy", Locale.US)
+		private val DATE_FORMAT_BAN = object : ThreadLocal<SimpleDateFormat>() {
+			override fun initialValue(): SimpleDateFormat {
+				return SimpleDateFormat("MMMM d yyyy", Locale.US)
+			}
+		}
 
 		private fun parseBanDate(value: String?): Long {
 			if (value == null) {
@@ -1121,7 +1125,7 @@ class FourchanChanPerformer : ChanPerformer() {
 			}
 			val cleanedValue = value.replace("(st|nd|rd|th),".toRegex(), "")
 			return try {
-				val date = DATE_FORMAT_BAN.parse(cleanedValue)
+				val date = DATE_FORMAT_BAN.get()!!.parse(cleanedValue)
 				date?.time ?: 0L
 			} catch (e: java.text.ParseException) {
 				0L

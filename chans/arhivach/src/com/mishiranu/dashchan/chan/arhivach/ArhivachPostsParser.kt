@@ -139,6 +139,7 @@ class ArhivachPostsParser(linked: Any, private val threadNumber: String) {
 		}
 
 		@JvmStatic
+		@Throws(ParseException::class)
 		fun parseCommonTime(date: String): GregorianCalendar? {
 			val matcher = PATTERN_DATE_COMMON.matcher(date)
 			if (matcher.matches()) {
@@ -149,7 +150,7 @@ class ArhivachPostsParser(linked: Any, private val threadNumber: String) {
 				val minute: Int
 				var calendar = GregorianCalendar(TIMEZONE_GMT)
 				val dayString = matcher.group(1)
-				val monthString = matcher.group(2)!!
+				val monthString = matcher.group(2) ?: throw ParseException()
 				if (StringUtils.isEmpty(dayString)) {
 					if ("вчера" == monthString) {
 						calendar.add(GregorianCalendar.DAY_OF_MONTH, -1)
@@ -157,17 +158,17 @@ class ArhivachPostsParser(linked: Any, private val threadNumber: String) {
 					day = calendar.get(GregorianCalendar.DAY_OF_MONTH)
 					month = calendar.get(GregorianCalendar.MONTH)
 				} else {
-					day = dayString!!.toInt()
+					day = dayString?.toIntOrNull() ?: throw ParseException()
 					month = MONTHS_1.indexOf(monthString)
 				}
 				val yearString = matcher.group(5)
 				if (yearString != null && yearString.isNotEmpty()) {
 					hour = 0
 					minute = 0
-					year = yearString!!.toInt()
+					year = yearString.toIntOrNull() ?: throw ParseException()
 				} else {
-					hour = matcher.group(3)!!.toInt()
-					minute = matcher.group(4)!!.toInt()
+					hour = matcher.group(3)?.toIntOrNull() ?: throw ParseException()
+					minute = matcher.group(4)?.toIntOrNull() ?: throw ParseException()
 					year = calendar.get(GregorianCalendar.YEAR)
 				}
 				calendar = GregorianCalendar(year, month, day, hour, minute, 0)
@@ -177,15 +178,16 @@ class ArhivachPostsParser(linked: Any, private val threadNumber: String) {
 			return null
 		}
 
+		@Throws(ParseException::class)
 		private fun parseTimestamp(date: String): Long {
 			var matcher = PATTERN_DATE_1.matcher(date)
 			if (matcher.find()) {
-				val day = matcher.group(1)!!.toInt()
-				val month = matcher.group(2)!!.toInt() - 1
-				val year = matcher.group(3)!!.toInt() + 2000
-				val hour = matcher.group(4)!!.toInt()
-				val minute = matcher.group(5)!!.toInt()
-				val second = matcher.group(6)!!.toInt()
+				val day = matcher.group(1)?.toIntOrNull() ?: throw ParseException()
+				val month = (matcher.group(2)?.toIntOrNull() ?: throw ParseException()) - 1
+				val year = (matcher.group(3)?.toIntOrNull() ?: throw ParseException()) + 2000
+				val hour = matcher.group(4)?.toIntOrNull() ?: throw ParseException()
+				val minute = matcher.group(5)?.toIntOrNull() ?: throw ParseException()
+				val second = matcher.group(6)?.toIntOrNull() ?: throw ParseException()
 				val calendar = GregorianCalendar(year, month, day, hour, minute, second)
 				calendar.timeZone = TIMEZONE_GMT
 				calendar.add(GregorianCalendar.HOUR, -3)
@@ -193,8 +195,8 @@ class ArhivachPostsParser(linked: Any, private val threadNumber: String) {
 			} else {
 				matcher = PATTERN_DATE_2.matcher(date)
 				if (matcher.find()) {
-					val day = matcher.group(1)!!.toInt()
-					val monthString = matcher.group(2)!!
+					val day = matcher.group(1)?.toIntOrNull() ?: throw ParseException()
+					val monthString = matcher.group(2) ?: throw ParseException()
 					var month = MONTHS_1.indexOf(monthString)
 					if (month == -1) {
 						month = MONTHS_2.indexOf(monthString)
@@ -202,10 +204,10 @@ class ArhivachPostsParser(linked: Any, private val threadNumber: String) {
 					if (month == -1) {
 						return 0L
 					}
-					val year = matcher.group(3)!!.toInt()
-					val hour = matcher.group(4)!!.toInt()
-					val minute = matcher.group(5)!!.toInt()
-					val second = matcher.group(6)!!.toInt()
+					val year = matcher.group(3)?.toIntOrNull() ?: throw ParseException()
+					val hour = matcher.group(4)?.toIntOrNull() ?: throw ParseException()
+					val minute = matcher.group(5)?.toIntOrNull() ?: throw ParseException()
+					val second = matcher.group(6)?.toIntOrNull() ?: throw ParseException()
 					val calendar = GregorianCalendar(year, month, day, hour, minute, second)
 					calendar.timeZone = TIMEZONE_GMT
 					calendar.add(GregorianCalendar.HOUR, -3)

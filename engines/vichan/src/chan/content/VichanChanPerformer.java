@@ -245,7 +245,7 @@ public class VichanChanPerformer extends ChanPerformer {
                     .addHeader("Referer", locator.buildPath().toString())
                     .setRedirectHandler(HttpRequest.RedirectHandler.STRICT).perform().readString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new InvalidResponseException(e);
         }
         if (jsonObject == null) {
             throw new InvalidResponseException();
@@ -314,7 +314,7 @@ public class VichanChanPerformer extends ChanPerformer {
             jsonObject = new JSONObject(new HttpRequest(uri, data).setPostMethod(entity)
                     .setRedirectHandler(HttpRequest.RedirectHandler.STRICT).perform().readString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new InvalidResponseException(e);
         }
         if (jsonObject == null) {
             throw new InvalidResponseException();
@@ -354,7 +354,7 @@ public class VichanChanPerformer extends ChanPerformer {
             jsonObject = new JSONObject(new HttpRequest(uri, data).setPostMethod(entity)
                     .setRedirectHandler(HttpRequest.RedirectHandler.STRICT).perform().readString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new InvalidResponseException(e);
         }
         if (jsonObject == null) {
             throw new InvalidResponseException();
