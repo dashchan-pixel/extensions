@@ -11,6 +11,10 @@
 !/COPYING
 !/README.md
 !/build.sh
+!/.editorconfig
+!/detekt.yml
+!/detekt-doublebang.yml
+!/scripts/
 !/gradlew
 !/gradlew.bat
 !/gradle/
