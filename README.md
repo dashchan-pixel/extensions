@@ -8,9 +8,9 @@ Old extensions are placed under their own specific branch. It's planned to move 
 
 1. Install JDK 8 or higher
 2. Install Android SDK, define `ANDROID_HOME` environment variable or set `sdk.dir` in `local.properties`
-3. Run `./gradlew :extensions:%CHAN_NAME%:assembleRelease`
+3. Run `./gradlew :chans:%CHAN_NAME%:assembleRelease`
 
-The resulting APK file will appear in `extensions/%CHAN_NAME%/build/outputs/apk` directory.
+The resulting APK file will appear in `chans/%CHAN_NAME%/build/outputs/apk` directory.
 
 ### Build Signed Binary
 

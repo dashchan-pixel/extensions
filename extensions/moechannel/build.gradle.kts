@@ -1,9 +1,0 @@
-plugins {
-	id("chan-extension")
-}
-
-chan {
-	versionName = "1.0"
-	apiVersion = 1
-	hosts("2channel.moe", "2channel.ga", "2channel5xx5xchx.onion")
-}

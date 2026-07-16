@@ -18,4 +18,4 @@ engine:
 
 module:
 - any:
-    - changed-files: ['extensions/**']
+    - changed-files: ['chans/**']

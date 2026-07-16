@@ -1,5 +1,5 @@
 pluginManagement {
-	includeBuild("library/plugins")
+	includeBuild("build-logic")
 	repositories {
 		google()
 		mavenCentral()
@@ -16,6 +16,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Dashchan-Extensions"
 
-includeBuild("library")
+includeBuild("sdk")
 file("engines").listFiles()?.filter { it.isDirectory && File(it, "build.gradle.kts").exists() }?.forEach { include(":engines:${it.name}") }
-file("extensions").listFiles()?.filter { it.isDirectory && File(it, "build.gradle.kts").exists() }?.forEach { include(":extensions:${it.name}") }
+file("chans").listFiles()?.filter { it.isDirectory && File(it, "build.gradle.kts").exists() }?.forEach { include(":chans:${it.name}") }

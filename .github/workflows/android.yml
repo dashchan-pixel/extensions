@@ -21,45 +21,21 @@ jobs:
       fail-fast: false
       matrix:
         package:
+          - module: arhivach
+            name: Arhivach
           - module: dvach
             name: Dvach
           - module: fourchan
             name: Fourchan
-          - module: endchan
-            name: Endchan
-          - module: cirno
-            name: Cirno
-          - module: sojakparty
-            name: Sojakparty
-          - module: refugedobrochan
-            name: RefugeDobrochan
-          - module: archivedmoe
-            name: ArchivedMoe
-          - module: archiverbt
-            name: ArchiveRbt
-          - module: desustorage
-            name: Desustorage
-          - module: dollchan
-            name: Dollchan
-          - module: warosu
-            name: Warosu
-          - module: archb4k
-            name: ArchB4K
-          - module: archiveforplebs
-            name: ArchiveForPlebs
-          - module: archiveofsins
-            name: ArchiveOfSins
-          - module: palanqwin
-            name: PalanqWin
+          - module: local
+            name: Local
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
       with:
-        submodules: 'recursive'
-    - name: set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
+        java-version: '21'
         distribution: 'temurin'
         cache: gradle
 
@@ -68,19 +44,19 @@ jobs:
       with:
         repository: ${{ secrets.KEYSTORE_DASHCHAN_REPO }}
         token: ${{ secrets.ACCESS_TOKEN }}
-        path: extensions/${{ matrix.package.module }}/keystore
+        path: chans/${{ matrix.package.module }}/keystore
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
     - name: Build ${{ matrix.package.name }} with Gradle
-      run: ./gradlew :extensions:${{ matrix.package.module }}:assembleRelease
+      run: ./gradlew :chans:${{ matrix.package.module }}:assembleRelease
 
     - name: Upload APK - ${{ matrix.package.name }}
       uses: actions/upload-artifact@v4
       with:
         name: Dashchan${{ matrix.package.name }}.apk
-        path: extensions/${{ matrix.package.module }}/build/outputs/apk/release/Dashchan${{ matrix.package.name }}-release.apk
+        path: chans/${{ matrix.package.module }}/build/outputs/apk/release/Dashchan${{ matrix.package.name }}-release.apk
 
 #  deploy:
 #    runs-on: ubuntu-latest

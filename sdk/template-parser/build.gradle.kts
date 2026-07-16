@@ -1,0 +1,10 @@
+plugins {
+	id("chan-library")
+}
+
+group = "chan.library"
+version = "0"
+
+dependencies {
+	compileOnly(project(":api"))
+}

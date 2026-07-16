@@ -24,5 +24,5 @@ case "${1:-release}" in
 esac
 if [[ "${1:-release}" != clean ]]; then
 	echo
-	ls extensions/*/build/outputs/apk/*/*.apk 2>/dev/null
+	ls chans/*/build/outputs/apk/*/*.apk 2>/dev/null
 fi
