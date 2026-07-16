@@ -1,6 +1,6 @@
 name: "Auto labeling"
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
     branches:
@@ -11,11 +11,11 @@ jobs:
     name: "Checking for labels"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          repository: "TrixiEther/Dashchan-Extensions"
+          repository: "${{ github.repository }}"
       - uses: actions/labeler@v5.0.0-alpha.1
         with:
-          repo-token: "${{ secrets.ACCESS_TOKEN }}"
+          repo-token: "${{ secrets.ACCESS_TOKEN || secrets.GITHUB_TOKEN }}"
           sync-labels: true
           configuration-path: ".github/labeler.config.yml"
