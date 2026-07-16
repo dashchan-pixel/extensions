@@ -5,9 +5,6 @@ import chan.http.RequestEntity
 import chan.text.ParseException
 import chan.text.TemplateParser
 import chan.util.StringUtils
-import java.util.ArrayList
-import java.util.Collections
-import java.util.HashSet
 
 open class VichanAntispamParser private constructor(
     source: String?,
@@ -21,7 +18,7 @@ open class VichanAntispamParser private constructor(
     private var fieldName: String? = null
 
     init {
-        Collections.addAll(this.ignoreFields, *ignoreFields)
+        this.ignoreFields.addAll(ignoreFields)
         PARSER.parse(source, this)
         for (field in fields) {
             entity.add(field.first, field.second)

@@ -10,6 +10,8 @@
 !/chan.properties
 !/COPYING
 !/README.md
+!/AGENTS.md
+!/CLAUDE.md
 !/build.sh
 !/.editorconfig
 !/detekt.yml

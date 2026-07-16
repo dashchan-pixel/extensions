@@ -1,7 +1,5 @@
 package com.mishiranu.dashchan.chan.fourchan
 
-import java.util.LinkedHashMap
-
 internal class ThreadsWithTailCache private constructor() {
     private val cache =
         object : LinkedHashMap<String, Any>(MAXIMUM_CAPACITY, LOAD_FACTOR, true) {

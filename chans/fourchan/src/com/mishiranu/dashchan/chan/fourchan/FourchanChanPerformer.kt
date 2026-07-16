@@ -31,11 +31,6 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.HashMap
-import java.util.HashSet
-import java.util.LinkedHashMap
 import java.util.Locale
 import java.util.regex.Pattern
 
@@ -785,8 +780,8 @@ class FourchanChanPerformer : ChanPerformer() {
                     .readString()
         }
         val fields = HashMap<String, String>()
-        for (name in Arrays.asList("reason", "startDate", "endDate")) {
-            for (tag in Arrays.asList("b", "span")) {
+        for (name in listOf("reason", "startDate", "endDate")) {
+            for (tag in listOf("b", "span")) {
                 val open = "<$tag class=\"$name\">"
                 var start = responseText.indexOf(open)
                 if (start < 0) {
@@ -1228,6 +1223,6 @@ class FourchanChanPerformer : ChanPerformer() {
                     "<td class=\"teaser-col\">(.*?)</td>",
             )
 
-        private val FORBIDDEN_OPTIONS = HashSet(Arrays.asList("nonoko", "nonokosage"))
+        private val FORBIDDEN_OPTIONS = hashSetOf("nonoko", "nonokosage")
     }
 }

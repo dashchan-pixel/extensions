@@ -21,9 +21,6 @@ import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.util.ArrayList
-import java.util.Collections
-import java.util.HashSet
 import java.util.regex.Pattern
 
 class ArhivachChanPerformer : ChanPerformer() {
@@ -104,7 +101,7 @@ class ArhivachChanPerformer : ChanPerformer() {
                 shift += remove
             }
             val queryText = if (queryBuilder != null) queryBuilder.toString() else searchQuery
-            Collections.addAll(tags, *queryText.split(" +".toRegex()).toTypedArray())
+            tags.addAll(queryText.split(" +".toRegex()))
             tags.remove("")
             if (tags.isEmpty()) {
                 return ReadSearchPostsResult()

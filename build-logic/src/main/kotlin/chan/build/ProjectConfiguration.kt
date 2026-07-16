@@ -22,7 +22,6 @@ internal object ProjectConfiguration {
 
 		android.sourceSets.getByName("main").apply {
 			manifest.srcFile(manifestFile(project))
-			java.setSrcDirs(listOf("src"))
 			kotlin.setSrcDirs(listOf("src"))
 			res.setSrcDirs(listOf("res"))
 			assets.setSrcDirs(listOf("assets"))
@@ -37,9 +36,6 @@ internal object ProjectConfiguration {
 			compilerOptions {
 				allWarningsAsErrors.set(true)
 				progressiveMode.set(true)
-				freeCompilerArgs.addAll(
-						"-Xjsr305=strict",
-				)
 			}
 		}
 

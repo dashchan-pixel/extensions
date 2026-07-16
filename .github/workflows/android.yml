@@ -2,7 +2,7 @@ name: Dashchan Extensions Build
 
 on:
   push:
-    branches: [ "rework", "master" ]
+    tags: [ "*-release" ]
     
 env:
   KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}

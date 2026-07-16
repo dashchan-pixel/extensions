@@ -4,7 +4,6 @@ import android.net.Uri
 import chan.text.ParseException
 import java.io.IOException
 import java.io.InputStream
-import java.util.ArrayList
 
 interface PostsParser {
     @Throws(IOException::class, ParseException::class)

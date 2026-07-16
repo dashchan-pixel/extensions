@@ -4,8 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
-import java.util.ArrayList
-import java.util.Arrays
 
 object FourchanCaptchaUtils {
     @JvmStatic
@@ -94,7 +92,7 @@ object FourchanCaptchaUtils {
                     bitmaps[i]!!.eraseColor(0x00000000)
                 }
                 @Suppress("UNCHECKED_CAST")
-                val result = callback.getIndex(Arrays.copyOf(bitmaps, maxCount) as Array<Bitmap>)
+                val result = callback.getIndex(bitmaps.copyOf(maxCount) as Array<Bitmap>)
                 if (result == null) {
                     return null
                 } else if (result < 0 || result >= count) {

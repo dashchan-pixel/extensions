@@ -9,7 +9,6 @@ import chan.text.ParseException
 import chan.util.CommonUtils
 import chan.util.StringUtils
 import java.io.IOException
-import java.util.ArrayList
 import java.util.Locale
 import java.util.regex.Pattern
 
