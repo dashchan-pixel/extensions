@@ -3,7 +3,6 @@ plugins {
 }
 
 chan {
-    versionName = "26.7"
     apiVersion = 1
     hosts("2ch.org", "2ch.su", "2ch.life", "2ch.hk")
 }

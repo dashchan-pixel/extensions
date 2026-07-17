@@ -1,0 +1,2 @@
+* Built and published by CI, signed with the release key
+* Version now comes from metadata/arhivach/versions.json, so updates can be offered

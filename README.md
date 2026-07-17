@@ -1,20 +1,26 @@
 # Dashchan Extensions
 
-This repositories contains supported extensions.
-
-Old extensions are placed under their own specific branch. It's planned to move them all into master branch.
+The extension APKs for [dashchan-pixel/client](https://github.com/dashchan-pixel/client),
+trimmed to **dvach**, **fourchan**, **arhivach** and **local**. Each extension is a separate
+APK the client loads dynamically.
 
 ## Building Guide
 
-1. Install JDK 8 or higher
-2. Install Android SDK, define `ANDROID_HOME` environment variable or set `sdk.dir` in `local.properties`
-3. Run `./gradlew :chans:%CHAN_NAME%:assembleRelease`
+1. Install JDK 17
+2. Install the Android SDK, define the `ANDROID_HOME` environment variable or set `sdk.dir` in `local.properties`
+3. Run `./gradlew :chans:%CHAN_NAME%:assembleRelease` (or `./gradlew assembleRelease` for all)
 
-The resulting APK file will appear in `chans/%CHAN_NAME%/build/outputs/apk` directory.
+The resulting APK file will appear in the `chans/%CHAN_NAME%/build/outputs/apk` directory.
 
-### Build Signed Binary
+## Versions
 
-You can create `keystore.properties` in the source code directory with the following properties:
+`metadata/%CHAN_NAME%/versions.json` is the single source of truth for an extension's version:
+the newest entry defines both `versionCode` and `versionName`, so a release bump is one atomic
+edit and the built APK can never disagree with the published update manifest.
+
+## Build Signed Binary
+
+Create `keystore.properties` in the source code directory:
 
 ```properties
 store.file=%PATH_TO_KEYSTORE_FILE%
@@ -22,6 +28,27 @@ store.password=%KEYSTORE_PASSWORD%
 key.alias=%KEY_ALIAS%
 key.password=%KEY_PASSWORD%
 ```
+
+Each value falls back to an environment variable when absent, which is how CI signs:
+`KEYSTORE_FILENAME`, `KEYSTORE_PASSWORD`, `RELEASE_SIGN_KEY_ALIAS`, `RELEASE_SIGN_KEY_PASSWORD`
+(the same names the client repo uses).
+
+**Without a readable keystore, release builds are signed with the debug key** so they stay
+installable for local development. Such an APK can never update a release-signed install, so
+CI verifies every published APK against the release certificate rather than trusting the build
+to have picked it up.
+
+## Releasing
+
+1. Append the new version to every `metadata/*/versions.json` and add
+   `metadata/%CHAN_NAME%/en/changelogs/<code>.txt` (one atomic commit), push.
+2. Push a tag named after the version (e.g. `26.7.1-pixel`). Every extension shares it.
+3. The `Release` workflow builds the APKs, verifies their signature, publishes the GitHub
+   release, and commits a refreshed `update/data-v1.json` (via `scripts/update_manifest.py`)
+   hashing the exact published binaries.
+
+`update/source.json` configures the manifest: repository title, the release URL template and
+the applications to publish.
 
 ## License
 

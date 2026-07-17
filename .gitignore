@@ -17,6 +17,8 @@
 !/detekt.yml
 !/detekt-doublebang.yml
 !/scripts/
+!/metadata/
+!/update/
 !/gradlew
 !/gradlew.bat
 !/gradle/

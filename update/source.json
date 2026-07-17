@@ -1,0 +1,28 @@
+{
+	"title": "Dashchan Pixel Extensions",
+	"source_template": "//github.com/dashchan-pixel/extensions/releases/download/{tag}/{archive}-{code}.apk",
+	"api_version": 1,
+	"min_sdk": 36,
+	"applications": [
+		{
+			"name": "dvach",
+			"title": "2ch.org",
+			"archive": "DashchanDvach"
+		},
+		{
+			"name": "fourchan",
+			"title": "4chan.org",
+			"archive": "DashchanFourchan"
+		},
+		{
+			"name": "arhivach",
+			"title": "arhivach.net",
+			"archive": "DashchanArhivach"
+		},
+		{
+			"name": "local",
+			"title": "localhost",
+			"archive": "DashchanLocal"
+		}
+	]
+}
