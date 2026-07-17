@@ -17,8 +17,6 @@ class FourchanChanLocator : ChanLocator() {
         addConvertableChanHost("www.4channel.org")
         addSpecialChanHost(HOST_BOARDS)
         addSpecialChanHost(HOST_BOARDS_SAFE)
-        addSpecialChanHost(HOST_SYS)
-        addSpecialChanHost(HOST_SYS_SAFE)
         addSpecialChanHost(HOST_API)
         addSpecialChanHost(HOST_IMAGES)
         addSpecialChanHost(HOST_IMAGES_IS1)
@@ -96,8 +94,6 @@ class FourchanChanLocator : ChanLocator() {
         return buildPathWithSchemeHost(true, HOST_STATIC, "image", "flags", boardName, fileName)
     }
 
-    fun createSysUri(vararg segments: String): Uri = buildPathWithSchemeHost(true, HOST_SYS, *segments)
-
     fun createSearchApiUri(vararg alternation: String): Uri = buildQueryWithHost(HOST_SEARCH, "api", *alternation)
 
     fun buildMathUri(data: String): Uri =
@@ -142,8 +138,6 @@ class FourchanChanLocator : ChanLocator() {
     companion object {
         private const val HOST_BOARDS = "boards.4chan.org"
         private const val HOST_BOARDS_SAFE = "boards.4channel.org"
-        private const val HOST_SYS = "sys.4chan.org"
-        private const val HOST_SYS_SAFE = "sys.4channel.org"
         private const val HOST_API = "a.4cdn.org"
         private const val HOST_IMAGES = "i.4cdn.org"
         private const val HOST_IMAGES_IS1 = "is.4chan.org"
