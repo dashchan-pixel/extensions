@@ -36,6 +36,7 @@ internal object ProjectConfiguration {
 			compilerOptions {
 				allWarningsAsErrors.set(true)
 				progressiveMode.set(true)
+				freeCompilerArgs.addAll("-Xwarning-level=USELESS_CAST:disabled")
 			}
 		}
 

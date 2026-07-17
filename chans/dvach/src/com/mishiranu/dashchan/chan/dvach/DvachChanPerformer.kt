@@ -154,7 +154,9 @@ class DvachChanPerformer : ChanPerformer() {
 
     @Throws(HttpException::class, InvalidResponseException::class, RedirectException::class)
     override fun onReadPosts(data: ReadPostsData): ReadPostsResult {
-        val usePartialApi = data.partialThreadLoading && data.lastPostNumber.isNotEmpty()
+        // The client passes a null lastPostNumber on the first open of a thread. The original Java
+        // tested `lastPostNumber != null`; isNullOrEmpty keeps that behaviour and stays null-safe.
+        val usePartialApi = data.partialThreadLoading && !data.lastPostNumber.isNullOrEmpty()
         var tryReadStatic = false
         try {
             return ReadPostsResult(onReadPosts(data, usePartialApi, false))
@@ -188,6 +190,8 @@ class DvachChanPerformer : ChanPerformer() {
         val configuration = this.configuration
         var handler = HttpRequest.RedirectHandler.BROWSER
         val archiveThreadUri = arrayOfNulls<Uri>(1)
+        // Hoisted into a local so the null-check smart-casts even once the SDK stub is corrected to String?.
+        val lastPostNumber: String? = data.lastPostNumber
         val uri: Uri =
             when {
                 usePartialApi ->
@@ -195,10 +199,10 @@ class DvachChanPerformer : ChanPerformer() {
                         "after",
                         data.boardName,
                         data.threadNumber,
-                        if (data.lastPostNumber.isEmpty()) {
+                        if (lastPostNumber.isNullOrEmpty()) {
                             data.threadNumber
                         } else {
-                            (data.lastPostNumber.toInt() + 1).toString()
+                            (lastPostNumber.toInt() + 1).toString()
                         },
                     )
                 archive -> {

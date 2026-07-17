@@ -464,9 +464,12 @@ open class ChanPerformer {
 
         /**
          * Last existing post number argument. Used when partial thread loading enabled.
+         *
+         * Null when the thread has no cached posts yet, i.e. on its first open. Matches the client's
+         * own declaration; a non-null type here silently defeats the null checks in extensions.
          */
         @JvmField
-        val lastPostNumber: String = BuildConfig.Private.expr()
+        val lastPostNumber: String? = BuildConfig.Private.expr()
 
         /**
          * Defines whether use partial thread loading or not.

@@ -49,7 +49,11 @@ class LocalPostsParser(
         } catch (e: OriginalPostParsedException) {
             // Ignore
         }
-        return Posts(post ?: Post()).addPostsCount(postsCount).addFilesCount(filesCount)
+        // The Java original passed a possibly-null post to Posts(Post...), which drops null items and
+        // yields an empty Posts. Passing a fabricated blank Post instead (as the conversion did) invents
+        // a phantom thread with no thread number, which the client then fails to open. listOfNotNull
+        // selects the Collection overload and reproduces the original empty-on-null semantics.
+        return Posts(listOfNotNull(post)).addPostsCount(postsCount).addFilesCount(filesCount)
     }
 
     @Throws(OriginalPostParsedException::class)
@@ -67,7 +71,9 @@ class LocalPostsParser(
                 post =
                     Post().apply {
                         setPostNumber(number)
-                        setThreadNumber(threadNumber)
+                        // Qualified: inside apply the receiver is the Post, whose own (null)
+                        // threadNumber property would otherwise shadow the parser's field.
+                        setThreadNumber(this@LocalPostsParser.threadNumber)
                     }
                 if (parent == null) {
                     parent = number

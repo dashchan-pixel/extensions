@@ -20,8 +20,9 @@ class LocalChanPerformer : ChanPerformer() {
         val from = THREADS_PER_PAGE * data.pageNumber
         val to = from + THREADS_PER_PAGE
         var current = 0
+        // getChildren() returns null when the directory is missing or is not a directory.
         val files = configuration.localDownloadDirectory.children
-        files.sortedByDescending { it.lastModified }.forEach { file ->
+        files?.sortedByDescending { it.lastModified }?.forEach { file ->
             val name = file.name
             if (!file.isDirectory && name.endsWith(".html")) {
                 if (current in from until to) {
@@ -39,6 +40,9 @@ class LocalChanPerformer : ChanPerformer() {
                         return null
                     }
                 }
+                // Counts every archived thread, not only those on this page: it is what advances
+                // the from/until window across pages.
+                current++
             }
         }
         return when {
@@ -109,7 +113,7 @@ class LocalChanPerformer : ChanPerformer() {
 
     private fun removeDirectory(directory: DataFile) {
         val thread = Thread.currentThread()
-        directory.children.forEach { file ->
+        directory.children?.forEach { file ->
             if (thread.isInterrupted) {
                 return
             }

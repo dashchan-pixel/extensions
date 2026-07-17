@@ -53,7 +53,7 @@ class DataFile private constructor() {
      * @return List of children [DataFile].
      */
     @get:JvmName("getChildren")
-    val children: List<DataFile> get() = BuildConfig.Private.expr()
+    val children: List<DataFile>? get() = BuildConfig.Private.expr()
 
     /**
      * Deletes the file.

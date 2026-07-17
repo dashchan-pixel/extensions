@@ -173,7 +173,8 @@ class FourchanChanPerformer : ChanPerformer() {
         val tail =
             ThreadsWithTailCache.INSTANCE.contains(data.threadNumber) &&
                 data.partialThreadLoading &&
-                data.lastPostNumber.isNotEmpty()
+                // The Java tested `lastPostNumber != null`; it is null on the first open of a thread.
+                !data.lastPostNumber.isNullOrEmpty()
         val posts = ArrayList<Post>()
         var uniquePosters = 0
         if (tail) {
@@ -205,7 +206,7 @@ class FourchanChanPerformer : ChanPerformer() {
                                         }
                                         val lastPostNum = data.lastPostNumber
                                         if (sincePostNumber != null &&
-                                            lastPostNum.isNotEmpty() &&
+                                            !lastPostNum.isNullOrEmpty() &&
                                             lastPostNum.toInt() >= sincePostNumber.toInt()
                                         ) {
                                             while (!reader.endStruct()) {
@@ -746,11 +747,15 @@ class FourchanChanPerformer : ChanPerformer() {
         return result
     }
 
+    // ChanConfiguration.get/set are operator functions, so detekt suggests indexed access; the
+    // named calls read better than `configuration[null, KEY, null]` for a three-argument accessor.
+    @Suppress("ExplicitCollectionElementAccessMethod")
     private fun saveCaptchaTicket(captchaTicket: String) {
         val configuration = ChanConfiguration.get(this) as FourchanChanConfiguration
         configuration.set(null, CAPTCHA_TICKET_KEY, captchaTicket)
     }
 
+    @Suppress("ExplicitCollectionElementAccessMethod")
     private fun getCaptchaTicket(): String? {
         val configuration = ChanConfiguration.get(this) as FourchanChanConfiguration
         return configuration.get(null, CAPTCHA_TICKET_KEY, null)
