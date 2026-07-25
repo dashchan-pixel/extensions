@@ -1,5 +1,5 @@
 {
-	"title": "Dashchan Pixel Extensions",
+	"title": "Dashchan [redacted] Extensions",
 	"applications": [
 		{
 			"name": "dvach",
@@ -13,7 +13,7 @@
 					"api_version": 1,
 					"min_sdk": 36,
 					"length": 295814,
-					"source": "//github.com/dashchan-pixel/extensions/releases/download/26.7.1-pixel/DashchanDvach-2.apk",
+					"source": "//github.com/dashchan-redacted/extensions/releases/download/26.7.1-pixel/DashchanDvach-2.apk",
 					"sha256sum": "17:04:41:6C:5E:61:F2:F2:2A:B9:7E:08:E9:E0:7C:89:46:B2:43:AE:E7:D7:77:2C:D6:2E:4C:02:4E:F5:84:65",
 					"fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
 				}
@@ -31,7 +31,7 @@
 					"api_version": 1,
 					"min_sdk": 36,
 					"length": 61654,
-					"source": "//github.com/dashchan-pixel/extensions/releases/download/26.7.1-pixel/DashchanFourchan-2.apk",
+					"source": "//github.com/dashchan-redacted/extensions/releases/download/26.7.1-pixel/DashchanFourchan-2.apk",
 					"sha256sum": "E5:12:23:A2:21:B0:4A:30:90:A6:C2:D7:10:62:FE:5A:CA:9E:AA:D3:BA:95:17:B0:78:3F:DA:C0:CC:E6:88:D8",
 					"fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
 				}
@@ -49,7 +49,7 @@
 					"api_version": 1,
 					"min_sdk": 36,
 					"length": 64698,
-					"source": "//github.com/dashchan-pixel/extensions/releases/download/26.7.1-pixel/DashchanArhivach-2.apk",
+					"source": "//github.com/dashchan-redacted/extensions/releases/download/26.7.1-pixel/DashchanArhivach-2.apk",
 					"sha256sum": "E8:FD:9C:14:B0:DB:78:D5:D7:C3:03:1C:6D:43:51:78:F1:13:9A:5B:77:C0:77:E4:0C:1D:7C:54:44:7C:F2:5B",
 					"fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
 				}
@@ -67,7 +67,7 @@
 					"api_version": 1,
 					"min_sdk": 36,
 					"length": 42322,
-					"source": "//github.com/dashchan-pixel/extensions/releases/download/26.7.1-pixel/DashchanLocal-2.apk",
+					"source": "//github.com/dashchan-redacted/extensions/releases/download/26.7.1-pixel/DashchanLocal-2.apk",
 					"sha256sum": "2E:7D:2C:AF:FD:3C:ED:D6:F2:6A:64:66:AE:81:C6:D1:3A:89:54:DC:1B:F6:F3:77:A5:B8:17:29:C2:F1:0D:01",
 					"fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
 				}

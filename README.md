@@ -1,6 +1,6 @@
 # Dashchan Extensions
 
-The extension APKs for [dashchan-pixel/client](https://github.com/dashchan-pixel/client),
+The extension APKs for [dashchan-redacted/client](https://github.com/dashchan-redacted/client),
 trimmed to **dvach**, **fourchan**, **arhivach** and **local**. Each extension is a separate
 APK the client loads dynamically.
 
@@ -42,7 +42,7 @@ to have picked it up.
 
 1. Append the new version to every `metadata/*/versions.json` and add
    `metadata/%CHAN_NAME%/en/changelogs/<code>.txt` (one atomic commit), push.
-2. Push a tag named after the version (e.g. `26.7.1-pixel`). Every extension shares it.
+2. Push a tag named after the version (e.g. `26.7.1-redacted`). Every extension shares it.
 3. The `Release` workflow builds the APKs, verifies their signature, publishes the GitHub
    release, and commits a refreshed `update/data-v1.json` (via `scripts/update_manifest.py`)
    hashing the exact published binaries.

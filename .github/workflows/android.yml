@@ -1,13 +1,13 @@
 name: Release
 
-# Pushing a tag equal to the newest metadata/<chan>/versions.json entry (e.g. 26.7.1-pixel)
+# Pushing a tag equal to the newest metadata/<chan>/versions.json entry (e.g. 26.7.1-redacted)
 # builds every extension's release APK, publishes them as one GitHub release and refreshes
 # update/data-v1.json on the default branch so the update manifest hashes the exact
 # published binaries. Mirrors the client repo's Release workflow.
 
 on:
   push:
-    tags: [ "*-pixel" ]
+    tags: [ "*-redacted" ]
 
 permissions:
   contents: write

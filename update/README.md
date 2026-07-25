@@ -2,7 +2,7 @@
 
 - `data-v1.json` — the update manifest the client reads (see the client's
   `URI_UPDATES_EXTENSIONS`); APKs are attached to
-  [GitHub Releases](https://github.com/dashchan-pixel/extensions/releases) of this
+  [GitHub Releases](https://github.com/dashchan-redacted/extensions/releases) of this
   repository (tag = version name). **Generated — do not hand-edit:** the `Release`
   workflow rewrites it from the APKs it just published, via
   `scripts/update_manifest.py`. It starts out with an empty `applications` list and

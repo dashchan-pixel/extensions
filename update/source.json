@@ -1,6 +1,6 @@
 {
-	"title": "Dashchan Pixel Extensions",
-	"source_template": "//github.com/dashchan-pixel/extensions/releases/download/{tag}/{archive}-{code}.apk",
+	"title": "Dashchan [redacted] Extensions",
+	"source_template": "//github.com/dashchan-redacted/extensions/releases/download/{tag}/{archive}-{code}.apk",
 	"api_version": 1,
 	"min_sdk": 36,
 	"applications": [
