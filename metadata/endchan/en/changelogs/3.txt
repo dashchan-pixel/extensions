@@ -1,0 +1,2 @@
+* Posts from other threads open as a post card instead of the whole thread
+* Opening a link to a reply now lands in the thread that holds it

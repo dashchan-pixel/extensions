@@ -9,6 +9,7 @@ import org.json.JSONObject
 
 class EndchanChanConfiguration : ChanConfiguration() {
     init {
+        request(OPTION_READ_SINGLE_POST)
         request(OPTION_READ_USER_BOARDS)
         setDefaultName("Anonymous")
         addCaptchaType(CAPTCHA_TYPE_ENDCHAN)

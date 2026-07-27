@@ -26,6 +26,7 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.text.ParseException
 import java.util.Locale
+import java.util.regex.Pattern
 
 class EndchanChanPerformer : ChanPerformer() {
     @Throws(HttpException::class, InvalidResponseException::class)
@@ -84,6 +85,49 @@ class EndchanChanPerformer : ChanPerformer() {
         } catch (e: ParseException) {
             throw InvalidResponseException(e)
         }
+    }
+
+    /**
+     * A post link may point into a thread that is not loaded, so the post has to be fetched on
+     * its own. Only the `preview` endpoint serves a single post, and its JSON form carries
+     * neither the post number nor the thread the post belongs to, so the thread is resolved from
+     * the self link of the HTML form.
+     */
+    @Throws(HttpException::class, InvalidResponseException::class)
+    override fun onReadSinglePost(data: ReadSinglePostData): ReadSinglePostResult {
+        val locator = ChanLocator.get<EndchanChanLocator>(this)
+        val threadNumber = readPreviewThreadNumber(data, locator)
+        val uri = locator.buildPath(data.boardName, "preview", "${data.postNumber}.json")
+        try {
+            val jsonObject = JSONObject(HttpRequest(uri, data).perform().readString())
+            val post =
+                EndchanModelMapper.createPreviewPost(
+                    jsonObject,
+                    locator,
+                    data.boardName,
+                    data.postNumber,
+                    threadNumber,
+                )
+            return ReadSinglePostResult(post)
+        } catch (e: JSONException) {
+            throw InvalidResponseException(e)
+        } catch (e: ParseException) {
+            throw InvalidResponseException(e)
+        }
+    }
+
+    @Throws(HttpException::class, InvalidResponseException::class)
+    private fun readPreviewThreadNumber(
+        data: ReadSinglePostData,
+        locator: EndchanChanLocator,
+    ): String {
+        val uri = locator.buildPath(data.boardName, "preview", "${data.postNumber}.html")
+        val responseText = HttpRequest(uri, data).perform().readString()
+        val matcher = PATTERN_PREVIEW_SELF_LINK.matcher(responseText)
+        if (!matcher.find()) {
+            throw InvalidResponseException()
+        }
+        return matcher.group(1) ?: throw InvalidResponseException()
     }
 
     @Throws(HttpException::class, InvalidResponseException::class)
@@ -507,6 +551,9 @@ class EndchanChanPerformer : ChanPerformer() {
 
     companion object {
         private val BOARDS_GENERAL = listOf("operate")
+
+        private val PATTERN_PREVIEW_SELF_LINK =
+            Pattern.compile("class=\"linkSelf\"[^>]*?href=\"/[^/\"]+/res/(\\d+)\\.html#")
 
         private const val REQUIRE_REPORT = "report"
         private const val REQUIRE_IP_BLOCK_BYPASS = "ip_block_bypass"

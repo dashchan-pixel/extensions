@@ -42,7 +42,28 @@ object EndchanModelMapper {
     }
 
     /**
+     * Builds the single post behind the `preview` endpoint, which serves a post out of its
+     * thread and therefore carries neither its own number nor the number of its thread.
+     */
+    @Throws(JSONException::class, ParseException::class)
+    fun createPreviewPost(
+        jsonObject: JSONObject,
+        locator: EndchanChanLocator,
+        boardName: String,
+        postNumber: String,
+        threadNumber: String,
+    ): Post =
+        createPost(
+            jsonObject,
+            locator,
+            threadNumber.takeIf { it != postNumber },
+            ThreadContext(boardName, emptySet()),
+            postNumber,
+        )
+
+    /**
      * [threadNumber] is `null` for an original post, whose own post number is the thread number.
+     * [postNumber] overrides the number carried by [jsonObject] for endpoints that omit it.
      */
     @Throws(JSONException::class, ParseException::class)
     private fun createPost(
@@ -50,6 +71,7 @@ object EndchanModelMapper {
         locator: EndchanChanLocator,
         threadNumber: String?,
         threadContext: ThreadContext,
+        postNumber: String? = null,
     ): Post {
         val post = Post()
         if (jsonObject.optInt("pinned") != 0) {
@@ -63,9 +85,9 @@ object EndchanModelMapper {
         }
         if (threadNumber != null) {
             post.parentPostNumber = threadNumber
-            post.postNumber = CommonUtils.getJsonString(jsonObject, "postId")
+            post.postNumber = postNumber ?: CommonUtils.getJsonString(jsonObject, "postId")
         } else {
-            post.postNumber = CommonUtils.getJsonString(jsonObject, "threadId")
+            post.postNumber = postNumber ?: CommonUtils.getJsonString(jsonObject, "threadId")
         }
         post.timestamp = parseCreationDate(CommonUtils.getJsonString(jsonObject, "creation"))
         mapName(post, jsonObject)
