@@ -44,13 +44,13 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7.2",
-                    "version_code": 3,
+                    "version_name": "26.7.3",
+                    "version_code": 4,
                     "api_version": 1,
                     "min_sdk": 36,
-                    "length": 62190,
-                    "source": "//github.com/dashchan-redacted/extensions/releases/download/endchan-26.7.2/DashchanEndchan-3.apk",
-                    "sha256sum": "77:A0:CE:C1:6B:17:B6:88:A2:E1:58:37:27:AD:C1:8C:53:9F:1A:17:9A:EC:A0:25:D3:11:C8:5B:68:1B:4F:F1",
+                    "length": 67730,
+                    "source": "//github.com/dashchan-redacted/extensions/releases/download/endchan-26.7.3/DashchanEndchan-4.apk",
+                    "sha256sum": "F9:2B:AF:6E:CD:62:AF:2A:95:47:9D:AD:66:01:64:4F:06:07:FA:74:82:0B:C6:F0:A7:1D:9E:C5:6E:88:7D:E0",
                     "fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
                 }
             ]
