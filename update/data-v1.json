@@ -8,7 +8,7 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7.1",
+                    "version_name": "26.7.1-pixel",
                     "version_code": 2,
                     "api_version": 1,
                     "min_sdk": 36,
@@ -26,7 +26,7 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7.1",
+                    "version_name": "26.7.1-pixel",
                     "version_code": 2,
                     "api_version": 1,
                     "min_sdk": 36,
@@ -62,7 +62,7 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7.1",
+                    "version_name": "26.7.1-pixel",
                     "version_code": 2,
                     "api_version": 1,
                     "min_sdk": 36,
@@ -80,7 +80,7 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7.1",
+                    "version_name": "26.7.1-pixel",
                     "version_code": 2,
                     "api_version": 1,
                     "min_sdk": 36,
