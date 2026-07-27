@@ -20,6 +20,11 @@
             "archive": "DashchanEndchan"
         },
         {
+            "name": "kohlchan",
+            "title": "kohlchan.net",
+            "archive": "DashchanKohlchan"
+        },
+        {
             "name": "arhivach",
             "title": "arhivach",
             "archive": "DashchanArhivach"
