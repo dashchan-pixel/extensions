@@ -7,15 +7,18 @@
 #   compileDebugKotlin  -- allWarningsAsErrors + -progressive: any warning is an error
 #   ktlintCheck         -- formatting, incl. the trailing commas that keep diffs small
 #   detekt              -- strict rules (empty catches, swallowed exceptions, etc.)
+#   jsonCheck           -- jq pretty-printing, and valid JSON at all (rides ktlintCheck)
 #
 #   detektDoubleBang is wired into `check` and reports '!!' advisory-only (never fails).
 #
 # This is a multi-module build, so the hook detects which modules have staged changes
 # and runs quality tasks only on those modules. A change in sdk/ or build-logic/
-# triggers a full build because every module depends on them.
+# triggers a full build because every module depends on them. jsonCheck is a root task
+# covering the whole tree, so whichever module gets checked also checks every JSON file.
 #
-# Only runs when Kotlin/Gradle files are actually staged -- a docs- or resource-only
-# commit should not pay for a Gradle run.
+# Only runs when Kotlin/Gradle/JSON files are actually staged -- a docs- or resource-only
+# commit should not pay for a Gradle run. A JSON-only commit runs `jsonCheck` alone, which
+# skips the Kotlin compile it does not need.
 #
 # Escape hatches:
 #   git commit --no-verify     skip entirely (use sparingly)
@@ -33,23 +36,28 @@ fi
 
 # Only consider files staged for this commit (Added/Copied/Modified/Renamed).
 staged=$(git diff --cached --name-only --diff-filter=ACMR -- '*.kt' '*.kts' 2>/dev/null)
-if [ -z "$staged" ]; then
+staged_json=$(git diff --cached --name-only --diff-filter=ACMR -- '*.json' 2>/dev/null)
+if [ -z "$staged" ] && [ -z "$staged_json" ]; then
     exit 0
 fi
 
 repo_root=$(git rev-parse --show-toplevel)
 cd "$repo_root" || exit 1
 
-file_count=$(echo "$staged" | wc -l | tr -d ' ')
-
 # Determine which Gradle tasks to run.
 # If shared infrastructure changed (sdk/, build-logic/, root files), run everything.
 # Otherwise, run only the affected modules.
 tasks=()
-if echo "$staged" | grep -qE '^(sdk/|build-logic/|build\.gradle\.kts|settings\.gradle\.kts|detekt\.yml|detekt-doublebang\.yml|\.editorconfig)'; then
+if [ -z "$staged" ]; then
+    # JSON-only commit: no Kotlin to compile or lint, so run the JSON gate on its own.
+    tasks+=(jsonCheck)
+    what="$(echo "$staged_json" | wc -l | tr -d ' ') JSON file(s)"
+elif echo "$staged" | grep -qE '^(sdk/|build-logic/|build\.gradle\.kts|settings\.gradle\.kts|detekt\.yml|detekt-doublebang\.yml|\.editorconfig)'; then
     # Shared infrastructure changed — full quality check.
     tasks+=(compileDebugKotlin ktlintCheck detekt)
+    what="$(echo "$staged" | wc -l | tr -d ' ') Kotlin file(s)"
 else
+    what="$(echo "$staged" | wc -l | tr -d ' ') Kotlin file(s)"
     # Collect affected modules.
     modules=()
     while IFS= read -r file; do
@@ -67,13 +75,14 @@ else
         # Staged .kt/.kts files don't map to a known module — run everything.
         tasks+=(compileDebugKotlin ktlintCheck detekt)
     else
+        # Each module's ktlintCheck pulls in the root jsonCheck, so JSON rides along.
         for mod in "${modules[@]}"; do
             tasks+=("${mod}:compileDebugKotlin" "${mod}:ktlintCheck" "${mod}:detekt")
         done
     fi
 fi
 
-echo "pre-commit: $file_count Kotlin file(s) staged — running quality gate..."
+echo "pre-commit: $what staged — running quality gate..."
 
 # --quiet keeps the hook readable; failures still print their own diagnostics.
 if ! ./gradlew --quiet "${tasks[@]}"; then
@@ -81,7 +90,7 @@ if ! ./gradlew --quiet "${tasks[@]}"; then
 
 pre-commit: FAILED — commit aborted.
 
-  Formatting problems?      ./gradlew ktlintFormat   (auto-fixes most of them)
+  Formatting problems?      ./gradlew ktlintFormat   (auto-fixes most of them, JSON included)
   Warning treated as error?  allWarningsAsErrors is on; fix the warning, do not suppress it.
   detekt finding?            New code must not add empty catches, swallowed exceptions,
                              or over-long methods. Existing legacy findings are frozen in

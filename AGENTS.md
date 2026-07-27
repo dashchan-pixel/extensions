@@ -40,6 +40,7 @@ While the AI translation successfully migrated all `.java` files to Kotlin, it i
 
 - Use **`./gradlew check`** to verify all quality gates (`detekt`, `detektDoubleBang`, and Android `lint` across all modules).
 - Rules are configured in `detekt.yml` and `detekt-doublebang.yml`.
+- **JSON is formatted too**: `jsonCheck`/`jsonFormat` (`jq --indent 4 .`, matching `[*.json]` in `.editorconfig`) hang off every module's `ktlintCheck`/`ktlintFormat`, so `./gradlew ktlintFormat` fixes it and the pre-commit hook rejects it. The tasks are root tasks covering the whole tree — `metadata/*/versions.json`, `update/source.json`, `update/data-v1.json` — so checking any one module checks all of them. Requires `jq` on PATH; the task also fails on JSON that does not parse. `scripts/update_manifest.py` writes the manifest at the same indent.
 
 ## Testing
 

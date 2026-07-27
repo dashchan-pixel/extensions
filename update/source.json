@@ -1,33 +1,33 @@
 {
-	"title": "Dashchan [redacted] Extensions",
-	"source_template": "//github.com/dashchan-redacted/extensions/releases/download/{tag}/{archive}-{code}.apk",
-	"api_version": 1,
-	"min_sdk": 36,
-	"applications": [
-		{
-			"name": "dvach",
-			"title": "2ch.org",
-			"archive": "DashchanDvach"
-		},
-		{
-			"name": "fourchan",
-			"title": "4chan.org",
-			"archive": "DashchanFourchan"
-		},
-		{
-			"name": "endchan",
-			"title": "endchan.net",
-			"archive": "DashchanEndchan"
-		},
-		{
-			"name": "arhivach",
-			"title": "arhivach",
-			"archive": "DashchanArhivach"
-		},
-		{
-			"name": "local",
-			"title": "localhost",
-			"archive": "DashchanLocal"
-		}
-	]
+    "title": "Dashchan [redacted] Extensions",
+    "source_template": "//github.com/dashchan-redacted/extensions/releases/download/{tag}/{archive}-{code}.apk",
+    "api_version": 1,
+    "min_sdk": 36,
+    "applications": [
+        {
+            "name": "dvach",
+            "title": "2ch.org",
+            "archive": "DashchanDvach"
+        },
+        {
+            "name": "fourchan",
+            "title": "4chan.org",
+            "archive": "DashchanFourchan"
+        },
+        {
+            "name": "endchan",
+            "title": "endchan.net",
+            "archive": "DashchanEndchan"
+        },
+        {
+            "name": "arhivach",
+            "title": "arhivach",
+            "archive": "DashchanArhivach"
+        },
+        {
+            "name": "local",
+            "title": "localhost",
+            "archive": "DashchanLocal"
+        }
+    ]
 }
