@@ -8,13 +8,13 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7.1-pixel",
-                    "version_code": 2,
+                    "version_name": "26.7.2",
+                    "version_code": 3,
                     "api_version": 1,
                     "min_sdk": 36,
-                    "length": 295814,
-                    "source": "//github.com/dashchan-redacted/extensions/releases/download/26.7.1/DashchanDvach-2.apk",
-                    "sha256sum": "17:04:41:6C:5E:61:F2:F2:2A:B9:7E:08:E9:E0:7C:89:46:B2:43:AE:E7:D7:77:2C:D6:2E:4C:02:4E:F5:84:65",
+                    "length": 295810,
+                    "source": "//github.com/dashchan-redacted/extensions/releases/download/dvach-26.7.2/DashchanDvach-3.apk",
+                    "sha256sum": "5F:4B:8D:D0:65:AF:9F:CC:DE:9D:61:20:6A:F2:4D:B6:7C:16:4F:06:4E:42:41:2E:6C:A4:2D:4A:6F:A4:37:61",
                     "fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
                 }
             ]
