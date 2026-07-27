@@ -1,4 +1,4 @@
-package com.mishiranu.dashchan.chan.endchan
+package chan.content
 
 import chan.content.model.FileAttachment
 import chan.content.model.Icon
@@ -15,13 +15,16 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.regex.Pattern
 
-object EndchanModelMapper {
-    @JvmStatic
+/**
+ * Maps the LynxChan JSON model onto the client's model. Every endpoint reuses the same post
+ * object, distinguished only by whether the number lives in `threadId` (an original post) or
+ * `postId` (a reply).
+ */
+open class LynxchanModelMapper(
+    protected val locator: LynxchanChanLocator,
+) {
     @Throws(JSONException::class)
-    fun createFileAttachment(
-        jsonObject: JSONObject,
-        locator: EndchanChanLocator,
-    ): FileAttachment {
+    open fun createFileAttachment(jsonObject: JSONObject): FileAttachment {
         val attachment = FileAttachment()
         attachment.setSize(jsonObject.optInt("size"))
         attachment.setWidth(jsonObject.optInt("width"))
@@ -30,7 +33,7 @@ object EndchanModelMapper {
         val thumb = CommonUtils.optJsonString(jsonObject, "thumb")
         val originalName = CommonUtils.optJsonString(jsonObject, "originalName")
         attachment.setFileUri(locator, locator.buildPath(path))
-        if (thumb == "/spoiler.png") {
+        if (thumb == SPOILER_THUMB) {
             attachment.setSpoiler(true)
         } else if (!StringUtils.isEmpty(thumb)) {
             attachment.setThumbnailUri(locator, locator.buildPath(thumb))
@@ -42,47 +45,18 @@ object EndchanModelMapper {
     }
 
     /**
-     * Builds the single post behind the `preview` endpoint, which serves a post out of its
-     * thread and therefore carries neither its own number nor the number of its thread.
-     */
-    @Throws(JSONException::class, ParseException::class)
-    fun createPreviewPost(
-        jsonObject: JSONObject,
-        locator: EndchanChanLocator,
-        boardName: String,
-        postNumber: String,
-        threadNumber: String,
-    ): Post =
-        createPost(
-            jsonObject,
-            locator,
-            threadNumber.takeIf { it != postNumber },
-            ThreadContext(boardName, emptySet()),
-            postNumber,
-        )
-
-    /**
      * [threadNumber] is `null` for an original post, whose own post number is the thread number.
      * [postNumber] overrides the number carried by [jsonObject] for endpoints that omit it.
      */
     @Throws(JSONException::class, ParseException::class)
-    private fun createPost(
+    protected fun createPost(
         jsonObject: JSONObject,
-        locator: EndchanChanLocator,
         threadNumber: String?,
         threadContext: ThreadContext,
         postNumber: String? = null,
     ): Post {
         val post = Post()
-        if (jsonObject.optInt("pinned") != 0) {
-            post.isSticky = true
-        }
-        if (jsonObject.optInt("locked") != 0) {
-            post.isClosed = true
-        }
-        if (jsonObject.optInt("cyclic") != 0) {
-            post.isCyclical = true
-        }
+        mapFlags(post, jsonObject)
         if (threadNumber != null) {
             post.parentPostNumber = threadNumber
             post.postNumber = postNumber ?: CommonUtils.getJsonString(jsonObject, "postId")
@@ -105,7 +79,7 @@ object EndchanModelMapper {
         } else {
             post.email = StringUtils.nullIfEmpty(StringUtils.clearHtml(email).trim())
         }
-        mapFlag(post, jsonObject, locator)
+        mapFlag(post, jsonObject)
         val subject = CommonUtils.optJsonString(jsonObject, "subject")
         if (subject != null) {
             post.subject = StringUtils.nullIfEmpty(StringUtils.clearHtml(subject).trim())
@@ -117,8 +91,26 @@ object EndchanModelMapper {
                 threadContext,
             )
         post.commentMarkup = CommonUtils.optJsonString(jsonObject, "message")
-        mapAttachments(post, jsonObject, locator)
+        mapAttachments(post, jsonObject)
         return post
+    }
+
+    private fun mapFlags(
+        post: Post,
+        jsonObject: JSONObject,
+    ) {
+        if (jsonObject.optInt("pinned") != 0) {
+            post.isSticky = true
+        }
+        if (jsonObject.optInt("locked") != 0) {
+            post.isClosed = true
+        }
+        if (jsonObject.optInt("cyclic") != 0) {
+            post.isCyclical = true
+        }
+        if (jsonObject.optBoolean("archived")) {
+            post.isArchived = true
+        }
     }
 
     @Throws(ParseException::class)
@@ -155,10 +147,13 @@ object EndchanModelMapper {
         post.name = name
     }
 
+    /**
+     * Flags cover both country flags and the per-board custom flags, which are the same field.
+     * The name falls back to the file name so a flag without a title still has a tooltip.
+     */
     private fun mapFlag(
         post: Post,
         jsonObject: JSONObject,
-        locator: EndchanChanLocator,
     ) {
         val flag = CommonUtils.optJsonString(jsonObject, "flag") ?: return
         val uri = locator.buildPath(flag)
@@ -179,7 +174,6 @@ object EndchanModelMapper {
     private fun mapAttachments(
         post: Post,
         jsonObject: JSONObject,
-        locator: EndchanChanLocator,
     ) {
         val jsonArray = jsonObject.optJSONArray("files")
         if (jsonArray == null || jsonArray.length() <= 0) {
@@ -187,21 +181,21 @@ object EndchanModelMapper {
         }
         val attachments = ArrayList<FileAttachment>(jsonArray.length())
         for (i in 0 until jsonArray.length()) {
-            attachments.add(createFileAttachment(jsonArray.getJSONObject(i), locator))
+            attachments.add(createFileAttachment(jsonArray.getJSONObject(i)))
         }
         post.setAttachments(attachments)
     }
 
     /**
-     * Old Endchan revisions render a quote link to a reply as `/<board>/res/<post>.html#<post>`,
-     * putting the quoted post number where the thread number belongs. That form is
-     * indistinguishable from a legitimate link to another thread's original post, so the
-     * thread number is only restored for posts known to belong to this very thread.
+     * Older revisions render a quote link to a reply as `/<board>/res/<post>.html#<post>`, putting
+     * the quoted post number where the thread number belongs. That form is indistinguishable from
+     * a legitimate link to another thread's original post, so the thread number is only restored
+     * for posts known to belong to this very thread.
      *
-     * Endchan also emits its own named colored spans. Green (quote) and red (heading) spans are
-     * handled by the markup, the rest are rewritten into explicit colors.
+     * LynxChan also emits named colored spans. Green (quote) and red (heading) spans are handled
+     * by the markup, the rest are rewritten into explicit colors.
      */
-    private fun transformComment(
+    protected open fun transformComment(
         comment: String?,
         threadNumber: String?,
         threadContext: ThreadContext,
@@ -224,38 +218,34 @@ object EndchanModelMapper {
                 }
         }
         return StringUtils.replaceAll(result, PATTERN_COLORED_TEXT) { matcher ->
-            when (val color = matcher.group(1).orEmpty()) {
-                // Green text is used for quotes, red text is used for headings
-                "green", "red" -> matcher.group().orEmpty()
-                "meme" -> "<span colored=\"true\" style=\"color: #ff0000\">"
-                "autism" -> "<span colored=\"true\" style=\"color: #aa44ff\">"
-                "orange" -> "<span colored=\"true\" style=\"color: #ffaa00\">"
-                "pink" -> "<span colored=\"true\" style=\"color: #ff66bb\">"
-                "brown" -> "<span colored=\"true\" style=\"color: #aa6600\">"
-                else -> "<span colored=\"true\" style=\"color: $color\">"
+            val color = matcher.group(1).orEmpty()
+            // Green text is used for quotes, red text is used for headings
+            if (color in MARKUP_HANDLED_COLORS) {
+                matcher.group().orEmpty()
+            } else {
+                "<span colored=\"true\" style=\"color: ${namedColors[color] ?: color}\">"
             }
         }
     }
 
-    @JvmStatic
+    /** Named spans a revision serves in place of a CSS color, keyed by the bare name. */
+    protected open val namedColors: Map<String, String> = NAMED_COLORS
+
     @Throws(JSONException::class, ParseException::class)
-    fun createPosts(
-        jsonObject: JSONObject,
-        locator: EndchanChanLocator,
-    ): Posts {
+    fun createPosts(jsonObject: JSONObject): Posts {
         val jsonArray = jsonObject.optJSONArray("posts")
         val threadContext =
             ThreadContext(
                 CommonUtils.optJsonString(jsonObject, "boardUri"),
                 collectPostNumbers(jsonArray),
             )
-        val originalPost = createPost(jsonObject, locator, null, threadContext)
+        val originalPost = createPost(jsonObject, null, threadContext)
         val posts = ArrayList<Post>(1 + (jsonArray?.length() ?: 0))
         posts.add(originalPost)
         if (jsonArray != null && jsonArray.length() > 0) {
             val threadNumber = originalPost.postNumber
             for (i in 0 until jsonArray.length()) {
-                posts.add(createPost(jsonArray.getJSONObject(i), locator, threadNumber, threadContext))
+                posts.add(createPost(jsonArray.getJSONObject(i), threadNumber, threadContext))
             }
         }
         return Posts(posts)
@@ -276,38 +266,41 @@ object EndchanModelMapper {
         return postNumbers
     }
 
-    @JvmStatic
     @Throws(JSONException::class, ParseException::class)
-    fun createThreads(
-        jsonArray: JSONArray,
-        locator: EndchanChanLocator,
-    ): List<Posts>? {
+    fun createThreads(jsonArray: JSONArray): List<Posts>? {
         if (jsonArray.length() <= 0) {
             return null
         }
         val threads = ArrayList<Posts>(jsonArray.length())
         for (i in 0 until jsonArray.length()) {
             val jsonObject = jsonArray.getJSONObject(i)
-            val posts = createPosts(jsonObject, locator)
-            posts.addPostsCount(jsonObject.optInt("ommitedPosts") + posts.posts.size)
+            val posts = createPosts(jsonObject)
+            posts.addPostsCount(omittedPosts(jsonObject) + posts.posts.size)
+            posts.addFilesCount(jsonObject.optInt("omittedFiles") + attachmentCount(posts))
             threads.add(posts)
         }
         return threads
     }
 
-    private val DATE_FORMAT =
-        object : ThreadLocal<SimpleDateFormat>() {
-            override fun initialValue(): SimpleDateFormat =
-                SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'", Locale.US).apply {
-                    timeZone = TimeZone.getTimeZone("UTC")
-                }
+    /**
+     * The catalog answers with the whole reply count in `postCount` and no posts, while a threads
+     * page answers with the first replies and the rest in `omittedPosts`. Revisions before the
+     * spelling was fixed serve `ommitedPosts`, so both keys are accepted.
+     */
+    private fun omittedPosts(jsonObject: JSONObject): Int {
+        if (jsonObject.has("postCount")) {
+            return jsonObject.optInt("postCount")
         }
+        return jsonObject.optInt("omittedPosts", jsonObject.optInt("ommitedPosts"))
+    }
+
+    private fun attachmentCount(posts: Posts): Int = posts.posts.sumOf { it.attachmentsCount }
 
     /**
-     * The replies of the thread a comment belongs to, used to tell an Endchan-mangled quote link
-     * apart from a link to the original post of another thread.
+     * The replies of the thread a comment belongs to, used to tell a mangled quote link apart
+     * from a link to the original post of another thread.
      */
-    private class ThreadContext(
+    class ThreadContext(
         private val boardName: String?,
         private val postNumbers: Set<String>,
     ) {
@@ -317,8 +310,31 @@ object EndchanModelMapper {
         ): Boolean = (this.boardName == null || this.boardName == boardName) && postNumber in postNumbers
     }
 
-    private val BROKEN_QUOTE_LINK = Regex("(<a class=\"quoteLink\".*?>)&gt&gt")
-    private val PATTERN_SELF_NUMBERED_LINK =
-        Pattern.compile("(<a [^>]*?href=\"/)([^/\"]+)(/res/)(\\d+)(\\.html#\\4\")")
-    private val PATTERN_COLORED_TEXT = Pattern.compile("<span class=\"(\\w+)Text\">")
+    companion object {
+        private const val SPOILER_THUMB = "/spoiler.png"
+
+        private val MARKUP_HANDLED_COLORS = setOf("green", "red")
+
+        private val NAMED_COLORS =
+            mapOf(
+                "meme" to "#ff0000",
+                "autism" to "#aa44ff",
+                "orange" to "#ffaa00",
+                "pink" to "#ff66bb",
+                "brown" to "#aa6600",
+            )
+
+        private val DATE_FORMAT =
+            object : ThreadLocal<SimpleDateFormat>() {
+                override fun initialValue(): SimpleDateFormat =
+                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
+                        timeZone = TimeZone.getTimeZone("UTC")
+                    }
+            }
+
+        private val BROKEN_QUOTE_LINK = Regex("(<a class=\"quoteLink\".*?>)&gt&gt")
+        private val PATTERN_SELF_NUMBERED_LINK =
+            Pattern.compile("(<a [^>]*?href=\"/)([^/\"]+)(/res/)(\\d+)(\\.html#\\4\")")
+        private val PATTERN_COLORED_TEXT = Pattern.compile("<span class=\"(\\w+)Text\">")
+    }
 }
