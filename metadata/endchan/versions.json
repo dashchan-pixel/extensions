@@ -11,6 +11,12 @@
             "name": "26.7.2",
             "date": "27.07.2026",
             "changelog": true
+        },
+        {
+            "code": 4,
+            "name": "26.7.3",
+            "date": "28.07.2026",
+            "changelog": true
         }
     ]
 }

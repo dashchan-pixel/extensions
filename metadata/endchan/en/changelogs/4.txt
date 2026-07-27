@@ -1,0 +1,2 @@
+* Posting works again on boards that ask for a captcha, which previously failed outright
+* Now built on the shared LynxChan engine, so fixes land on every LynxChan board at once
