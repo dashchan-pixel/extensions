@@ -43,27 +43,37 @@ def find_apksigner():
 	raise SystemExit('apksigner not found; set ANDROID_HOME or put it on PATH')
 
 
+# Anchored on the bare word Signer, because every label apksigner is known to use
+# contains it and nothing else in the output does. Requiring the line to *start*
+# with it, as this did before, is what kept breaking releases: build-tools 36
+# reports per signature scheme as "V2 Signer: ...", which starts with the scheme.
+SIGNER_LINE = re.compile(r'^(?:V\d+\s+)?Signer\b')
 DIGEST_LINE = re.compile(r'certificate SHA-256 digest:\s*([0-9a-fA-F]{64})$')
 
 
 def read_fingerprint(apksigner, apk_path):
 	"""SHA-256 of the signing certificate, which is what ChanManager compares.
 
-	The label is "Signer #1 certificate SHA-256 digest: <hex>", but apksigner
-	inserts "(minSdkVersion=..., maxSdkVersion=...)" before the number when a
-	signing block is recorded per SDK range, and which build-tools version the
-	runner happens to have decides whether it does. Anchoring on the exact
-	label is therefore what broke releases, so match it loosely instead.
+	Which build-tools version the runner happens to have decides how apksigner
+	labels the signer, and all three known spellings have to be read:
+
+	    Signer #1 certificate SHA-256 digest: <hex>
+	    Signer #1 (minSdkVersion=..., maxSdkVersion=...) certificate SHA-256 ...
+	    V2 Signer: certificate SHA-256 digest: <hex>
+
+	Only the certificate digest is taken, never the "public key SHA-256 digest"
+	line that -v adds, since the client hashes the certificate.
 	"""
 	output = subprocess.run([apksigner, 'verify', '--print-certs', apk_path],
 			check=True, capture_output=True, text=True).stdout
 	digests = []
 	for line in output.splitlines():
+		line = line.strip()
 		# "in lineage" entries describe keys that were rotated away and are not
 		# what an installed extension was signed with.
-		if not line.startswith('Signer ') or 'in lineage' in line:
+		if not SIGNER_LINE.match(line) or 'in lineage' in line:
 			continue
-		match = DIGEST_LINE.search(line.strip())
+		match = DIGEST_LINE.search(line)
 		if match:
 			digest = match.group(1).lower()
 			# One certificate listed once per SDK range is still one signer.
