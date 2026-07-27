@@ -200,11 +200,20 @@ class DvachChanConfiguration : ChanConfiguration() {
         const val CAPTCHA_TYPE_2CH_CAPTCHA = "2ch_captcha"
         const val CAPTCHA_TYPE_2CH_EMOJI_CAPTCHA = "emoji_captcha"
 
+        /**
+         * Registration order, and therefore the default: the client keeps the types in a
+         * LinkedHashSet and picks the first as the default for a chan it has no preference
+         * stored for (Preferences.getCaptchaTypeForChan). Emoji goes first because it is the
+         * only endpoint 2ch still serves -- api/captcha/{2chcaptcha,recaptcha,
+         * invisible_recaptcha}/id answer 404 with error 667 on every domain, even though
+         * api/captcha/settings/<board> keeps advertising 2chcaptcha. The dead types stay
+         * registered so a user who selected one keeps it if the endpoints ever return.
+         */
         @JvmField
         val CAPTCHA_TYPES: Map<String, String> =
             linkedMapOf(
-                CAPTCHA_TYPE_2CH_CAPTCHA to "2chcaptcha",
                 CAPTCHA_TYPE_2CH_EMOJI_CAPTCHA to "emoji",
+                CAPTCHA_TYPE_2CH_CAPTCHA to "2chcaptcha",
                 CAPTCHA_TYPE_RECAPTCHA_2 to "recaptcha",
                 CAPTCHA_TYPE_RECAPTCHA_2_INVISIBLE to "invisible_recaptcha",
             )
