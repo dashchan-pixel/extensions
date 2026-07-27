@@ -562,6 +562,15 @@ open class ChanPerformer {
          */
         @JvmField
         val postNumber: String = BuildConfig.Private.expr()
+
+        /**
+         * Thread the post belongs to, when the link the post was reached through named it. Always
+         * set on the only path that reaches [onReadSinglePost] today, because the client requires
+         * a thread URI to offer the post card at all. Prefer this over resolving the thread from
+         * the post number when the engine can serve a post out of its thread.
+         */
+        @JvmField
+        val threadNumber: String? = BuildConfig.Private.expr()
     }
 
     /**
@@ -1064,7 +1073,10 @@ open class ChanPerformer {
             BuildConfig.Private.expr<Any>(key, value)
         }
 
-        operator fun set(key: String?, value: String?) = put(key, value)
+        // No operator set(): the client's CaptchaData declares only put(), so an indexed
+        // assignment would compile into a set() that does not exist and fail with
+        // NoSuchMethodError at runtime. get() below is safe because the operator modifier is
+        // compile-time only and the client does declare a get() method of that exact signature.
 
         /**
          * Get captcha data from map.
