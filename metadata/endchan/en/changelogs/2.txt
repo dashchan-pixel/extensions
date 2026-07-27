@@ -1,0 +1,5 @@
+* New extension for endchan.net
+* Rewritten in Kotlin against the current SDK
+* Dropped the dead endchan.gg and endchan.xyz domains
+* Posting now reports the reason returned by the server instead of "Unknown error"
+* Links to other threads no longer end up as "The post isn't found"

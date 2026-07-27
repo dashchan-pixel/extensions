@@ -44,12 +44,12 @@ object EndchanModelMapper {
     /**
      * [threadNumber] is `null` for an original post, whose own post number is the thread number.
      */
-    @JvmStatic
     @Throws(JSONException::class, ParseException::class)
-    fun createPost(
+    private fun createPost(
         jsonObject: JSONObject,
         locator: EndchanChanLocator,
         threadNumber: String?,
+        threadContext: ThreadContext,
     ): Post {
         val post = Post()
         if (jsonObject.optInt("pinned") != 0) {
@@ -88,7 +88,12 @@ object EndchanModelMapper {
         if (subject != null) {
             post.subject = StringUtils.nullIfEmpty(StringUtils.clearHtml(subject).trim())
         }
-        post.comment = transformComment(CommonUtils.getJsonString(jsonObject, "markdown"), threadNumber ?: post.postNumber)
+        post.comment =
+            transformComment(
+                CommonUtils.getJsonString(jsonObject, "markdown"),
+                threadNumber ?: post.postNumber,
+                threadContext,
+            )
         post.commentMarkup = CommonUtils.optJsonString(jsonObject, "message")
         mapAttachments(post, jsonObject, locator)
         return post
@@ -166,22 +171,36 @@ object EndchanModelMapper {
     }
 
     /**
-     * Endchan renders self-links with the wrong thread number in the path, and emits its own
-     * named colored spans. Green (quote) and red (heading) spans are handled by the markup,
-     * the rest are rewritten into explicit colors.
+     * Old Endchan revisions render a quote link to a reply as `/<board>/res/<post>.html#<post>`,
+     * putting the quoted post number where the thread number belongs. That form is
+     * indistinguishable from a legitimate link to another thread's original post, so the
+     * thread number is only restored for posts known to belong to this very thread.
+     *
+     * Endchan also emits its own named colored spans. Green (quote) and red (heading) spans are
+     * handled by the markup, the rest are rewritten into explicit colors.
      */
     private fun transformComment(
         comment: String?,
         threadNumber: String?,
+        threadContext: ThreadContext,
     ): String? {
-        if (comment.isNullOrEmpty() || threadNumber == null) {
+        if (comment.isNullOrEmpty()) {
             return comment
         }
         var result = comment.replace(BROKEN_QUOTE_LINK, "$1&gt;&gt;") // Fix html
-        result =
-            StringUtils.replaceAll(result, PATTERN_BROKEN_LINK) { matcher ->
-                matcher.group(1).orEmpty() + threadNumber + matcher.group(3).orEmpty()
-            }
+        if (threadNumber != null) {
+            result =
+                StringUtils.replaceAll(result, PATTERN_SELF_NUMBERED_LINK) { matcher ->
+                    val boardName = matcher.group(2).orEmpty()
+                    val quotedNumber = matcher.group(4).orEmpty()
+                    if (threadContext.isOwnReply(boardName, quotedNumber)) {
+                        matcher.group(1).orEmpty() + boardName + matcher.group(3).orEmpty() +
+                            threadNumber + matcher.group(5).orEmpty()
+                    } else {
+                        matcher.group().orEmpty()
+                    }
+                }
+        }
         return StringUtils.replaceAll(result, PATTERN_COLORED_TEXT) { matcher ->
             when (val color = matcher.group(1).orEmpty()) {
                 // Green text is used for quotes, red text is used for headings
@@ -202,17 +221,37 @@ object EndchanModelMapper {
         jsonObject: JSONObject,
         locator: EndchanChanLocator,
     ): Posts {
-        val originalPost = createPost(jsonObject, locator, null)
         val jsonArray = jsonObject.optJSONArray("posts")
+        val threadContext =
+            ThreadContext(
+                CommonUtils.optJsonString(jsonObject, "boardUri"),
+                collectPostNumbers(jsonArray),
+            )
+        val originalPost = createPost(jsonObject, locator, null, threadContext)
         val posts = ArrayList<Post>(1 + (jsonArray?.length() ?: 0))
         posts.add(originalPost)
         if (jsonArray != null && jsonArray.length() > 0) {
             val threadNumber = originalPost.postNumber
             for (i in 0 until jsonArray.length()) {
-                posts.add(createPost(jsonArray.getJSONObject(i), locator, threadNumber))
+                posts.add(createPost(jsonArray.getJSONObject(i), locator, threadNumber, threadContext))
             }
         }
         return Posts(posts)
+    }
+
+    @Throws(JSONException::class)
+    private fun collectPostNumbers(jsonArray: JSONArray?): Set<String> {
+        if (jsonArray == null || jsonArray.length() <= 0) {
+            return emptySet()
+        }
+        val postNumbers = HashSet<String>(jsonArray.length())
+        for (i in 0 until jsonArray.length()) {
+            val postNumber = CommonUtils.optJsonString(jsonArray.getJSONObject(i), "postId")
+            if (!postNumber.isNullOrEmpty()) {
+                postNumbers.add(postNumber)
+            }
+        }
+        return postNumbers
     }
 
     @JvmStatic
@@ -242,7 +281,22 @@ object EndchanModelMapper {
                 }
         }
 
+    /**
+     * The replies of the thread a comment belongs to, used to tell an Endchan-mangled quote link
+     * apart from a link to the original post of another thread.
+     */
+    private class ThreadContext(
+        private val boardName: String?,
+        private val postNumbers: Set<String>,
+    ) {
+        fun isOwnReply(
+            boardName: String,
+            postNumber: String,
+        ): Boolean = (this.boardName == null || this.boardName == boardName) && postNumber in postNumbers
+    }
+
     private val BROKEN_QUOTE_LINK = Regex("(<a class=\"quoteLink\".*?>)&gt&gt")
-    private val PATTERN_BROKEN_LINK = Pattern.compile("(<a [^>]*?href=\"/[^/]+/res/)(\\d+)(.html#\\2\")")
+    private val PATTERN_SELF_NUMBERED_LINK =
+        Pattern.compile("(<a [^>]*?href=\"/)([^/\"]+)(/res/)(\\d+)(\\.html#\\4\")")
     private val PATTERN_COLORED_TEXT = Pattern.compile("<span class=\"(\\w+)Text\">")
 }
