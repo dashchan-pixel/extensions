@@ -35,7 +35,11 @@ class LocalChanLocator : ChanLocator() {
     override fun createThreadUri(
         boardName: String?,
         threadNumber: String,
-    ): Uri = buildPath("null", "res", "$threadNumber.html")
+    ): Uri =
+        // buildPath appends the segments already encoded, so the separators of a thread number that
+        // names a subdirectory pass through while the directory names themselves — which the user
+        // chose, spaces and all — get encoded. getPath() decodes them back on the way in.
+        buildPath("null", "res", Uri.encode("$threadNumber.html", "/"))
 
     override fun createPostUri(
         boardName: String?,
@@ -44,6 +48,9 @@ class LocalChanLocator : ChanLocator() {
     ): Uri = createThreadUri(boardName, threadNumber).buildUpon().fragment(postNumber).build()
 
     companion object {
-        private val THREAD_PATH = Pattern.compile("/null/res/([^/.]+)\\.html")
+        // Greedy and slash-tolerant: a thread number is a path relative to the archive root, so it
+        // may span directories and those may carry dots of their own. Backtracking off ".html"
+        // leaves the whole relative path in group 1.
+        private val THREAD_PATH = Pattern.compile("/null/res/(.+)\\.html")
     }
 }
