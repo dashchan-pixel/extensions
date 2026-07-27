@@ -15,6 +15,16 @@ on:
 permissions:
   contents: write
 
+# Keyed on the tag, so a re-push or re-run of one tag cannot race itself while two
+# different extensions stay free to release at the same time. A repository-wide group
+# would be worse than no grouping at all: GitHub keeps only one *pending* run per group
+# and cancels any earlier pending one, so pushing three tags together would queue the
+# second and then silently drop it when the third arrived. Races between extensions are
+# handled where they actually happen, in the manifest step below.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -137,13 +147,36 @@ jobs:
           NAME: ${{ steps.extension.outputs.name }}
           APK: ${{ steps.extension.outputs.apk }}
         run: |
-          git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
-          git worktree add ../manifest "origin/$BRANCH"
-          python3 scripts/update_manifest.py "$GITHUB_REF_NAME" ../manifest/update/data-v1.json \
-              "$NAME" "$APK"
-          cd ../manifest
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add update/data-v1.json
-          git commit -m "Update manifest for $GITHUB_REF_NAME" || exit 0
-          git push origin "HEAD:$BRANCH"
+          git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          git worktree add --detach ../manifest "origin/$BRANCH"
+
+          # Regenerating and re-pushing rather than pushing one prepared commit, because the
+          # generator merges: it rewrites this extension's entry and keeps every other one as
+          # its own last release left it. A sibling release that lands between the fetch and
+          # the push therefore has to be merged into, and a plain retry of a commit built on
+          # the stale manifest would drop it. Losing an entry is invisible until someone
+          # cannot install the extension, so this is worth the loop.
+          for attempt in 1 2 3 4 5; do
+            git -C ../manifest reset --hard "origin/$BRANCH"
+            python3 scripts/update_manifest.py "$GITHUB_REF_NAME" \
+                ../manifest/update/data-v1.json "$NAME" "$APK"
+            if git -C ../manifest diff --quiet -- update/data-v1.json; then
+              # Already describes this release: a re-run, not a failure.
+              echo "manifest on $BRANCH already describes $GITHUB_REF_NAME"
+              exit 0
+            fi
+            git -C ../manifest add update/data-v1.json
+            git -C ../manifest commit -m "Update manifest for $GITHUB_REF_NAME"
+            if git -C ../manifest push origin "HEAD:$BRANCH"; then
+              echo "manifest updated on $BRANCH"
+              exit 0
+            fi
+            echo "push rejected on attempt $attempt: $BRANCH moved, merging again"
+            sleep $((attempt * 5))
+            git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          done
+          echo "could not update the manifest on $BRANCH after 5 attempts; the release is" \
+               "published but unadvertised -- rerun this job once $BRANCH settles" >&2
+          exit 1
