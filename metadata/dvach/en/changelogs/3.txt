@@ -1,0 +1,1 @@
+* Posting works again on a fresh install: the emoji captcha is now the default one
