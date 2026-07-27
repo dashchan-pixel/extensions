@@ -15,6 +15,11 @@
 			"archive": "DashchanFourchan"
 		},
 		{
+			"name": "endchan",
+			"title": "endchan.net",
+			"archive": "DashchanEndchan"
+		},
+		{
 			"name": "arhivach",
 			"title": "arhivach",
 			"archive": "DashchanArhivach"
