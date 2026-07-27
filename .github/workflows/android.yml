@@ -1,15 +1,16 @@
 name: Release
 
-# Pushing a version tag in major.minor(.patch) form (e.g. 26.7.1) equal to the newest
-# metadata/<chan>/versions.json entry builds every extension's release APK, publishes them
-# as one GitHub release and refreshes update/data-v1.json on the default branch so the
-# update manifest hashes the exact published binaries. Mirrors the client repo's Release workflow.
+# Pushing a tag named <extension>-<version> (e.g. endchan-26.7.2), where <version> equals the
+# newest metadata/<extension>/versions.json entry, builds that one extension's release APK,
+# publishes it as its own GitHub release and merges it into update/data-v1.json on the default
+# branch. Extensions are versioned and released independently: every other application keeps
+# the manifest entry describing its own last release, so their versions never have to agree.
 
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+'
+      # Rejects the plain version tags of the lockstep releases published before the split.
+      - '*-[0-9]+.[0-9]+*'
 
 permissions:
   contents: write
@@ -30,19 +31,30 @@ jobs:
             exit 1
           fi
 
-      - name: Verify the tag matches every extension version
+      - name: Resolve the tag to an extension
+        id: extension
         run: |
           python3 - "$GITHUB_REF_NAME" <<'EOF'
-          import json, pathlib, sys
+          import json, os, pathlib, sys
           tag = sys.argv[1]
-          bad = []
-          for path in sorted(pathlib.Path('metadata').glob('*/versions.json')):
-              latest = max(json.loads(path.read_text())['versions'], key=lambda v: v['code'])
-              if latest['name'] != tag:
-                  bad.append(f"{path}: newest version is {latest['name']}")
-          if bad:
-              raise SystemExit(f"tag {tag} does not match:\n" + "\n".join(bad))
-          print(f"tag {tag} matches every extension")
+          # Extension names carry no dash, so the first one separates name from version.
+          name, _, version = tag.partition('-')
+          source = json.loads(pathlib.Path('update/source.json').read_text())
+          application = next((a for a in source['applications'] if a['name'] == name), None)
+          if application is None:
+              known = ', '.join(a['name'] for a in source['applications'])
+              raise SystemExit(f'tag {tag}: unknown extension "{name}"; update/source.json has {known}')
+          path = pathlib.Path(f'metadata/{name}/versions.json')
+          latest = max(json.loads(path.read_text())['versions'], key=lambda v: v['code'])
+          if latest['name'] != version:
+              raise SystemExit(f'tag {tag}: {path} newest version is {latest["name"]}')
+          archive = application['archive']
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'name={name}\n')
+              f.write(f'code={latest["code"]}\n')
+              f.write(f'archive={archive}\n')
+              f.write(f'apk=chans/{name}/build/outputs/apk/release/{archive}-release.apk\n')
+          print(f'{tag} builds {name} version code {latest["code"]}')
           EOF
 
       - uses: actions/setup-java@v4
@@ -59,7 +71,7 @@ jobs:
       - name: Decode signing keystore
         run: echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
 
-      - name: Build release APKs
+      - name: Build the release APK
         env:
           KEYSTORE_FILENAME: ${{ runner.temp }}/release.keystore
           KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
@@ -67,14 +79,15 @@ jobs:
           RELEASE_SIGN_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease
+          ./gradlew ":chans:${{ steps.extension.outputs.name }}:assembleRelease"
 
       # The plugin falls back to the debug key when no keystore can be read, which would
-      # otherwise produce a green build full of APKs that can never update a real install.
-      - name: Verify the APKs carry the release signature
+      # otherwise produce a green build whose APK can never update a real install.
+      - name: Verify the APK carries the release signature
         env:
           KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          APK: ${{ steps.extension.outputs.apk }}
         run: |
           expected=$(keytool -list -v -keystore "$RUNNER_TEMP/release.keystore" \
               -storepass "$KEYSTORE_PASSWORD" -alias "$RELEASE_KEY_ALIAS" \
@@ -84,38 +97,31 @@ jobs:
             exit 1
           fi
           echo "expected signer: $expected"
-          for apk in chans/*/build/outputs/apk/release/*-release.apk; do
-            actual=$(apksigner verify --print-certs "$apk" \
-                | sed -n 's/.*certificate SHA-256 digest: //p' | head -1 | tr 'A-F' 'a-f')
-            if [ "$actual" != "$expected" ]; then
-              echo "$apk is not signed with the release key (signer: $actual)" >&2
-              exit 1
-            fi
-            echo "ok: $apk"
-          done
+          actual=$(apksigner verify --print-certs "$APK" \
+              | sed -n 's/.*certificate SHA-256 digest: //p' | head -1 | tr 'A-F' 'a-f')
+          if [ "$actual" != "$expected" ]; then
+            echo "$APK is not signed with the release key (signer: $actual)" >&2
+            exit 1
+          fi
+          echo "ok: $APK"
 
-      - name: Prepare release assets and changelog
+      - name: Prepare the release asset and changelog
         id: release_meta
+        env:
+          NAME: ${{ steps.extension.outputs.name }}
+          CODE: ${{ steps.extension.outputs.code }}
+          ARCHIVE: ${{ steps.extension.outputs.archive }}
+          APK: ${{ steps.extension.outputs.apk }}
         run: |
           mkdir -p "$RUNNER_TEMP/assets"
-          python3 - "$GITHUB_REF_NAME" "$RUNNER_TEMP/assets" <<'EOF'
-          import json, os, pathlib, shutil, sys
-          tag, assets = sys.argv[1], pathlib.Path(sys.argv[2])
-          source = json.loads(pathlib.Path('update/source.json').read_text())
-          body = []
-          for application in source['applications']:
-              name, archive = application['name'], application['archive']
-              versions = json.loads(pathlib.Path(f'metadata/{name}/versions.json').read_text())
-              latest = max(versions['versions'], key=lambda v: v['code'])
-              code = latest['code']
-              built = pathlib.Path(f'chans/{name}/build/outputs/apk/release/{archive}-release.apk')
-              # Name the asset after the version code, matching source_template.
-              shutil.copyfile(built, assets / f'{archive}-{code}.apk')
-              changelog = pathlib.Path(f'metadata/{name}/en/changelogs/{code}.txt')
-              if latest.get('changelog') and changelog.exists():
-                  body.append(f"### {application['title']}\n\n{changelog.read_text().strip()}")
-          pathlib.Path(os.environ['RUNNER_TEMP'], 'body.md').write_text("\n\n".join(body) + "\n")
-          EOF
+          # Name the asset after the version code, matching source_template.
+          cp "$APK" "$RUNNER_TEMP/assets/$ARCHIVE-$CODE.apk"
+          changelog="metadata/$NAME/en/changelogs/$CODE.txt"
+          if [ -f "$changelog" ]; then
+            cp "$changelog" "$RUNNER_TEMP/body.md"
+          else
+            : > "$RUNNER_TEMP/body.md"
+          fi
           echo "body=$RUNNER_TEMP/body.md" >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub release
@@ -128,11 +134,13 @@ jobs:
       - name: Refresh update manifest on the default branch
         env:
           BRANCH: ${{ github.event.repository.default_branch }}
+          NAME: ${{ steps.extension.outputs.name }}
+          APK: ${{ steps.extension.outputs.apk }}
         run: |
           git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
           git worktree add ../manifest "origin/$BRANCH"
           python3 scripts/update_manifest.py "$GITHUB_REF_NAME" ../manifest/update/data-v1.json \
-              chans/*/build/outputs/apk/release/*-release.apk
+              "$NAME" "$APK"
           cd ../manifest
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

@@ -1,8 +1,8 @@
 # Dashchan Extensions
 
 The extension APKs for [dashchan-redacted/client](https://github.com/dashchan-redacted/client),
-trimmed to **dvach**, **fourchan**, **arhivach** and **local**. Each extension is a separate
-APK the client loads dynamically.
+trimmed to **dvach**, **fourchan**, **endchan**, **arhivach** and **local**. Each extension is a
+separate APK the client loads dynamically.
 
 ## Building Guide
 
@@ -17,6 +17,10 @@ The resulting APK file will appear in the `chans/%CHAN_NAME%/build/outputs/apk` 
 `metadata/%CHAN_NAME%/versions.json` is the single source of truth for an extension's version:
 the newest entry defines both `versionCode` and `versionName`, so a release bump is one atomic
 edit and the built APK can never disagree with the published update manifest.
+
+Each extension is versioned on its own. Version codes and names never have to agree between
+extensions, because the update manifest records one entry per application and a release only
+rewrites the entry it published.
 
 ## Build Signed Binary
 
@@ -40,15 +44,21 @@ to have picked it up.
 
 ## Releasing
 
-1. Append the new version to every `metadata/*/versions.json` and add
-   `metadata/%CHAN_NAME%/en/changelogs/<code>.txt` (one atomic commit), push.
-2. Push a tag named after the version (e.g. `26.7.1`). Every extension shares it.
-3. The `Release` workflow builds the APKs, verifies their signature, publishes the GitHub
-   release, and commits a refreshed `update/data-v1.json` (via `scripts/update_manifest.py`)
-   hashing the exact published binaries.
+Extensions are released one at a time.
 
-`update/source.json` configures the manifest: repository title, the release URL template and
-the applications to publish.
+1. Append the new version to `metadata/%CHAN_NAME%/versions.json` and add
+   `metadata/%CHAN_NAME%/en/changelogs/<code>.txt` (one atomic commit), push.
+2. Push a tag named `%CHAN_NAME%-<version>` (e.g. `endchan-26.7.2`), where `<version>` is that
+   extension's newest version name. The workflow refuses a tag that disagrees with it.
+3. The `Release` workflow builds that one APK, verifies its signature, publishes it as its own
+   GitHub release, and commits an `update/data-v1.json` (via `scripts/update_manifest.py`) in
+   which only that application's entry changed, hashing the exact published binary.
+
+Releasing several extensions means pushing several tags; nothing has to be released together.
+
+`update/source.json` configures the manifest: repository title, the release URL template, and
+the applications to publish along with the order they appear in. It stays authoritative for the
+titles, so correcting one does not need a release.
 
 ## License
 
