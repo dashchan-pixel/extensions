@@ -86,6 +86,68 @@ val jsonCheck =
 			checkOnly = true
 		}
 
+// scripts/update_manifest.py turns a built APK into the entry the client reads out of
+// update/data-v1.json, and it is the one piece of release-critical logic no other gate in
+// this build can see: it is not Kotlin, nothing compiles it, and it only ever runs on a tag
+// push. Its apksigner parsing broke twice, and both times the APK was built, signed and
+// published before the failure surfaced, leaving a release nothing could install. Its tests
+// therefore run as an ordinary part of `check`.
+abstract class PythonTestTask : DefaultTask() {
+	@get:InputFile
+	abstract val testScript: RegularFileProperty
+
+	/** The script under test and the metadata both of them read. */
+	@get:InputFiles
+	abstract val inputFiles: ConfigurableFileCollection
+
+	/** Resolved eagerly: the configuration cache forbids reaching for the project here. */
+	@get:Internal
+	abstract val workingDir: DirectoryProperty
+
+	/** Only so Gradle can skip the task when nothing it reads has changed. */
+	@get:OutputFile
+	abstract val stamp: RegularFileProperty
+
+	@TaskAction
+	fun test() {
+		val root = workingDir.get().asFile
+		val script = testScript.get().asFile
+		val name = script.relativeToOrSelf(root).invariantSeparatorsPath
+		val process =
+				try {
+					// -B: importing the script under test would otherwise leave a
+					// scripts/__pycache__ that .gitignore's allowlist does not cover.
+					ProcessBuilder("python3", "-B", script.path)
+							.directory(root)
+							.redirectErrorStream(true)
+							.start()
+				} catch (e: java.io.IOException) {
+					throw GradleException("python3 is required to run $name", e)
+				}
+		val output = process.inputStream.use { it.readBytes() }.decodeToString()
+		if (process.waitFor() != 0) {
+			throw GradleException("$name failed:\n$output")
+		}
+		stamp.get().asFile.apply { parentFile.mkdirs() }.writeText(output)
+	}
+}
+
+val manifestScriptTest =
+		tasks.register<PythonTestTask>("manifestScriptTest") {
+			description = "Runs the update manifest generator's tests."
+			group = "verification"
+			testScript = layout.projectDirectory.file("scripts/test_update_manifest.py")
+			inputFiles.from(
+					layout.projectDirectory.file("scripts/update_manifest.py"),
+					layout.projectDirectory.file("update/source.json"),
+					fileTree(layout.projectDirectory.dir("metadata")) {
+						include("*/versions.json")
+					},
+			)
+			workingDir = layout.projectDirectory
+			stamp = layout.buildDirectory.file("manifest-script-test.txt")
+		}
+
 subprojects {
 	// The ktlint plugin is applied by ExtensionPlugin/LibraryPlugin, i.e. after this script
 	// runs, so match the tasks lazily rather than looking them up now.
@@ -94,5 +156,10 @@ subprojects {
 	}
 	tasks.matching { it.name == "ktlintCheck" }.configureEach {
 		dependsOn(jsonCheck)
+	}
+	// Wired to `check` rather than to a lint task, because it is a test and not a matter of
+	// formatting. The pre-commit hook runs it directly when a script is staged.
+	tasks.matching { it.name == "check" }.configureEach {
+		dependsOn(manifestScriptTest)
 	}
 }

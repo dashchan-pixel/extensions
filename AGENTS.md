@@ -39,8 +39,9 @@ While the AI translation successfully migrated all `.java` files to Kotlin, it i
 
 ## Lint & inspections
 
-- Use **`./gradlew check`** to verify all quality gates (`detekt`, `detektDoubleBang`, and Android `lint` across all modules).
+- Use **`./gradlew check`** to verify all quality gates (`detekt`, `detektDoubleBang`, `manifestScriptTest`, and Android `lint` across all modules).
 - Rules are configured in `detekt.yml` and `detekt-doublebang.yml`.
+- **The release tooling is tested**: `manifestScriptTest` runs `scripts/test_update_manifest.py` (stdlib `unittest`, needs `python3`) and hangs off every module's `check`; the pre-commit hook runs it when a `.py` is staged. `scripts/update_manifest.py` is the only release-critical logic no other gate can see — it is not Kotlin and only ever runs on a tag push — and it shipped broken twice, each time *after* the APK was published, leaving a release nothing could install. Don't reach for a real APK or `apksigner` in those tests: they pin the apksigner text parsing and the manifest merge, which is why they run anywhere.
 - **JSON is formatted too**: `jsonCheck`/`jsonFormat` (`jq --indent 4 .`, matching `[*.json]` in `.editorconfig`) hang off every module's `ktlintCheck`/`ktlintFormat`, so `./gradlew ktlintFormat` fixes it and the pre-commit hook rejects it. The tasks are root tasks covering the whole tree — `metadata/*/versions.json`, `update/source.json`, `update/data-v1.json` — so checking any one module checks all of them. Requires `jq` on PATH; the task also fails on JSON that does not parse. `scripts/update_manifest.py` writes the manifest at the same indent.
 
 ## Testing
