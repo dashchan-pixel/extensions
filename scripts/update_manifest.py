@@ -43,15 +43,37 @@ def find_apksigner():
 	raise SystemExit('apksigner not found; set ANDROID_HOME or put it on PATH')
 
 
+DIGEST_LINE = re.compile(r'certificate SHA-256 digest:\s*([0-9a-fA-F]{64})$')
+
+
 def read_fingerprint(apksigner, apk_path):
-	"""SHA-256 of the signing certificate, which is what ChanManager compares."""
+	"""SHA-256 of the signing certificate, which is what ChanManager compares.
+
+	The label is "Signer #1 certificate SHA-256 digest: <hex>", but apksigner
+	inserts "(minSdkVersion=..., maxSdkVersion=...)" before the number when a
+	signing block is recorded per SDK range, and which build-tools version the
+	runner happens to have decides whether it does. Anchoring on the exact
+	label is therefore what broke releases, so match it loosely instead.
+	"""
 	output = subprocess.run([apksigner, 'verify', '--print-certs', apk_path],
 			check=True, capture_output=True, text=True).stdout
-	digests = re.findall(r'Signer #\d+ certificate SHA-256 digest:\s*([0-9a-fA-F]{64})', output)
+	digests = []
+	for line in output.splitlines():
+		# "in lineage" entries describe keys that were rotated away and are not
+		# what an installed extension was signed with.
+		if not line.startswith('Signer ') or 'in lineage' in line:
+			continue
+		match = DIGEST_LINE.search(line.strip())
+		if match:
+			digest = match.group(1).lower()
+			# One certificate listed once per SDK range is still one signer.
+			if digest not in digests:
+				digests.append(digest)
 	if not digests:
-		raise SystemExit(f'{apk_path}: apksigner printed no SHA-256 certificate digest')
+		# Printing the output makes the next format change diagnosable from the log.
+		raise SystemExit(f'{apk_path}: no SHA-256 certificate digest in apksigner output:\n{output}')
 	# The client compares the whole signer set, so every signer has to be listed.
-	return [d.lower() for d in digests]
+	return digests
 
 
 def group_hex(value):
