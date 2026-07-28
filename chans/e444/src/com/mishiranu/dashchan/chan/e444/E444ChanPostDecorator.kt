@@ -276,16 +276,5 @@ class E444ChanPostDecorator : ChanPostDecorator() {
         ): String = "${boardName.orEmpty()}:$postNumber"
 
         private fun errorMessage(response: org.json.JSONObject): String? = response.optJSONObject("error")?.optString("message")?.takeIf { it.isNotEmpty() }
-
-        /**
-         * Reports a failure that only costs the user a decoration. Deliberately not an exception:
-         * the client would show "extension error" for a post that is otherwise perfectly readable.
-         */
-        fun logDecorationFailure(
-            message: String,
-            t: Throwable,
-        ) {
-            android.util.Log.w("E444Decorator", message, t)
-        }
     }
 }

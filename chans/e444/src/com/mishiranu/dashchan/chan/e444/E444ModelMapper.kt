@@ -42,6 +42,30 @@ internal object E444ModelMapper {
 
     private const val EMAIL_SAGE = "sage"
 
+    /**
+     * Whether the app can carry a post's opaque payload, which is what the decorator draws from.
+     *
+     * `Post.setExtra` arrived with the decorator API, so an app built before it cannot resolve the
+     * call at all, and the app's own wrapper turns the [LinkageError] that follows into an extension
+     * error -- one post with a poll on it would fail the whole read rather than cost a decoration.
+     * The payload is written only where there is something to hand it to, which is what lets an
+     * older app show these posts exactly as the previous release did.
+     *
+     * Asked of the class rather than of the app's version, once: which version first carried the
+     * method is a fact about a build, while the method either is there or is not.
+     */
+    private val payloadCarried: Boolean by lazy {
+        try {
+            Post::class.java.getMethod("setExtra", String::class.java)
+            true
+        } catch (e: NoSuchMethodException) {
+            // Expected on an app older than the decorator API, and the one place that says why a
+            // poll or a reaction is nowhere to be seen.
+            E444PostExtra.logPayloadFailure("App has no post payload; decorations are left out", e)
+            false
+        }
+    }
+
     fun readBoardInfo(reader: JsonSerial.Reader): E444BoardInfo {
         val info = E444BoardInfo()
         reader.startObject()
@@ -296,7 +320,9 @@ internal object E444ModelMapper {
                 }
             }
             attachments?.let(post::setAttachments)
-            encodeExtra()?.let(post::setExtra)
+            if (payloadCarried) {
+                encodeExtra()?.let(post::setExtra)
+            }
             return post
         }
 
@@ -321,7 +347,7 @@ internal object E444ModelMapper {
             return try {
                 extra.encode()
             } catch (e: IOException) {
-                E444ChanPostDecorator.logDecorationFailure("Cannot store post payload", e)
+                E444PostExtra.logPayloadFailure("Cannot store post payload", e)
                 null
             }
         }

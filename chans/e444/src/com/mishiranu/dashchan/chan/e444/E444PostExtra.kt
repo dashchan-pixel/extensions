@@ -140,12 +140,27 @@ internal class E444PostExtra(
             return try {
                 JsonSerial.reader(extra.toByteArray(Charsets.UTF_8)).use(::read)
             } catch (e: ParseException) {
-                E444ChanPostDecorator.logDecorationFailure("Unreadable post payload", e)
+                logPayloadFailure("Unreadable post payload", e)
                 EMPTY
             } catch (e: IOException) {
-                E444ChanPostDecorator.logDecorationFailure("Unreadable post payload", e)
+                logPayloadFailure("Unreadable post payload", e)
                 EMPTY
             }
+        }
+
+        /**
+         * Reports a failure that only costs the user a decoration. Deliberately not an exception:
+         * the app would show "extension error" for a post that is otherwise perfectly readable.
+         *
+         * It lives here rather than with the decorator because the parser calls it, and the parser
+         * runs on every app -- including one with no decorator API at all, where merely naming
+         * [E444ChanPostDecorator] would have to resolve a superclass that does not exist.
+         */
+        fun logPayloadFailure(
+            message: String,
+            t: Throwable,
+        ) {
+            android.util.Log.w("E444Payload", message, t)
         }
 
         @Throws(IOException::class, ParseException::class)
