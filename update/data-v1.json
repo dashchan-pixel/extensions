@@ -92,6 +92,24 @@
             ]
         },
         {
+            "name": "karachan",
+            "type": "chan",
+            "title": "karachan.org",
+            "packages": [
+                {
+                    "title": "Release",
+                    "version_name": "26.7",
+                    "version_code": 1,
+                    "api_version": 1,
+                    "min_sdk": 36,
+                    "length": 62630,
+                    "source": "//github.com/dashchan-redacted/extensions/releases/download/karachan-26.7/DashchanKarachan-1.apk",
+                    "sha256sum": "97:BF:7E:1A:95:0B:F6:12:53:C9:13:D0:4D:C6:C1:4F:BB:41:A5:46:C8:07:54:C9:35:4B:C4:D9:A6:3C:1B:42",
+                    "fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
+                }
+            ]
+        },
+        {
             "name": "arhivach",
             "type": "chan",
             "title": "arhivach",
