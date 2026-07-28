@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:width="24dp"
+	android:height="24dp"
+	android:viewportWidth="70.71094"
+	android:viewportHeight="70.71094">
+
+	<!--
+		The logo is a 70.71 x 28.28 wordmark. The viewport is squared off and the group is
+		translated down by (70.71 - 28.28) / 2 = 21.2134 so the glyph sits centred in the
+		24dp square every other extension icon uses, instead of being squashed to fit.
+	-->
+	<group
+		android:translateX="-44.64453"
+		android:translateY="-152.5732">
+
+		<path
+			android:fillColor="#ffffffff"
+			android:pathData="M80 173.78662l-7.070313 3.53515 3.535157 1.76856 10.607422 5.30273L80 187.9292l-10.607422
+				-5.30371 -3.535156 -1.76758 -7.070313 3.53515 3.535157 1.76758 10.607421 5.30371 -7.072265 3.53614
+				-10.605469 -5.30372 -3.537109 -1.76757 -7.070313 3.53515 3.535156 1.76758 17.677735 8.83887L80
+				194.99951l14.142578 7.07129 17.677732 -8.83887 3.53516 -1.76758 -7.07031 -3.53515 -3.53711
+				1.76757 -10.605472 5.30372 -7.072266 -3.53614 14.142578 -7.07129 -17.677734 -8.83886z" />
+
+	</group>
+
+</vector>

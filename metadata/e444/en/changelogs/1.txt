@@ -1,0 +1,5 @@
+* New extension for ech.u, rewritten in Kotlin
+* Thread lists load again: every one of them used to fail with "Invalid server response"
+* Boards, catalog, threads, posting, deleting, reporting and the slide captcha all work
+* Reachable through ech.bz and ech.ist as well as the Web3 name
+* Post polls, reactions and the per-post menu are not included
