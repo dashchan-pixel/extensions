@@ -1,0 +1,4 @@
+* Threads filed into subfolders of the archive are now listed, newest first among the rest
+* Their images, thumbnails and deletion work wherever in the archive the thread sits
+* Opening a saved thread from a file manager no longer requires it to sit at the top
+* A thread saved twice under one name is listed once, the newer copy
