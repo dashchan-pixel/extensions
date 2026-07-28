@@ -1,0 +1,5 @@
+* Post polls are back: every answer shows its share of the vote, and tapping one votes
+* Post reactions are back, with a picker in the post's long-press menu
+* Both are drawn through the app's post decorator API instead of by reflecting into the app
+* Needs an app build that provides that API; on older ones the extension works as before, without polls and reactions
+* The per-post navigator menu is still not included

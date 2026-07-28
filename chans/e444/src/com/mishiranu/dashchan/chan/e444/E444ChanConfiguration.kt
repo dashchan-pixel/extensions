@@ -81,11 +81,65 @@ class E444ChanConfiguration : ChanConfiguration() {
         if (info.maxComment > 0) {
             set(boardName, KEY_MAX_COMMENT_LENGTH, info.maxComment)
         }
+        set(
+            boardName,
+            KEY_REACTION_ICONS,
+            if (info.enableReactions) info.reactions.joinToString(ICON_SEPARATOR) else "",
+        )
         storeBoardTitle(boardName, info.title)
         storeBoardDescription(boardName, StringUtils.clearHtml(info.description).trim())
         storeDefaultName(boardName, info.defaultName)
         storeBumpLimit(boardName, info.bumpLimit)
         storePagesCount(boardName, info.maxPages)
+    }
+
+    /**
+     * Icon names the board allows as reactions, for the picker the post decorator adds to the post
+     * context menu. Stored per board because only a board list response carries them, and the
+     * decorator runs long after one was read.
+     */
+    internal fun getReactionIcons(boardName: String?): List<String> {
+        val stored = get(boardName, KEY_REACTION_ICONS, "").orEmpty()
+        if (StringUtils.isEmpty(stored)) {
+            return emptyList()
+        }
+        return stored.split(ICON_SEPARATOR).filter { it.isNotEmpty() }
+    }
+
+    /**
+     * Which poll answer this user picked for a post, or `-1` if none.
+     *
+     * The board's poll response reports only totals, so the user's own choice has to be remembered
+     * locally to keep the answer highlighted. Kept here rather than in the post payload because it
+     * belongs to this install, not to the post.
+     */
+    internal fun getVotedPollAnswer(stateKey: String): Int = get(null, "$KEY_PREFIX_POLL_VOTE$stateKey", -1)
+
+    internal fun setVotedPollAnswer(
+        stateKey: String,
+        index: Int,
+    ) {
+        set(null, "$KEY_PREFIX_POLL_VOTE$stateKey", index)
+    }
+
+    /** Reactions this user has added to a post, for the same reason as [getVotedPollAnswer]. */
+    internal fun getUsedReactions(stateKey: String): Set<String> {
+        val stored = get(null, "$KEY_PREFIX_REACTIONS_USED$stateKey", "").orEmpty()
+        if (StringUtils.isEmpty(stored)) {
+            return emptySet()
+        }
+        return stored.split(ICON_SEPARATOR).filter { it.isNotEmpty() }.toSet()
+    }
+
+    internal fun toggleUsedReaction(
+        stateKey: String,
+        icon: String,
+    ) {
+        val used = getUsedReactions(stateKey).toMutableSet()
+        if (!used.remove(icon)) {
+            used.add(icon)
+        }
+        set(null, "$KEY_PREFIX_REACTIONS_USED$stateKey", used.joinToString(ICON_SEPARATOR))
     }
 
     companion object {
@@ -100,6 +154,12 @@ class E444ChanConfiguration : ChanConfiguration() {
         private const val KEY_SAGE_ENABLED = "sage_enabled"
         private const val KEY_FILES_ENABLED = "files_enabled"
         private const val KEY_MAX_COMMENT_LENGTH = "max_comment_length"
+        private const val KEY_REACTION_ICONS = "reaction_icons"
+
+        private const val ICON_SEPARATOR = " "
+
+        private const val KEY_PREFIX_POLL_VOTE = "poll_vote_"
+        private const val KEY_PREFIX_REACTIONS_USED = "reactions_used_"
 
         private const val DEFAULT_MAX_COMMENT_LENGTH = 15000
         private const val MAX_ATTACHMENTS = 4

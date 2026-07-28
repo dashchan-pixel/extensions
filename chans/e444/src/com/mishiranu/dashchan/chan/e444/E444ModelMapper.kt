@@ -6,6 +6,7 @@ import chan.content.model.Post
 import chan.content.model.Posts
 import chan.text.JsonSerial
 import chan.util.StringUtils
+import java.io.IOException
 
 /**
  * The subset of a board descriptor the extension actually consumes. The board object is
@@ -23,12 +24,16 @@ internal class E444BoardInfo {
     var enableSage = false
     var enableSubject = false
     var enableTrips = false
+    var enableReactions = false
     var hasFileTypes = false
 
     var bumpLimit = 0
     var maxComment = 0
     var maxPages = 0
     var speed = 0
+
+    /** Icon names the board allows as reactions, empty when it has them turned off. */
+    var reactions: List<String> = emptyList()
 }
 
 internal object E444ModelMapper {
@@ -51,6 +56,8 @@ internal object E444ModelMapper {
                 "enable_sage" -> info.enableSage = reader.nextInt() != 0
                 "enable_subject" -> info.enableSubject = reader.nextInt() != 0
                 "enable_trips" -> info.enableTrips = reader.nextInt() != 0
+                "enable_reactions" -> info.enableReactions = reader.nextInt() != 0
+                "reactions" -> info.reactions = readStringArray(reader)
                 "file_types" -> info.hasFileTypes = readArrayNotEmpty(reader)
                 "bump_limit" -> info.bumpLimit = reader.nextInt()
                 "max_comment" -> info.maxComment = reader.nextInt()
@@ -100,6 +107,18 @@ internal object E444ModelMapper {
         }
     }
 
+    /**
+     * Reads one post object and appends it, for the single-post endpoint the decorator re-reads after
+     * a vote or a reaction.
+     */
+    fun readPostInto(
+        reader: JsonSerial.Reader,
+        locator: E444ChanLocator,
+        posts: MutableList<Post>,
+    ) {
+        posts.add(readPost(reader, locator))
+    }
+
     private fun readPost(
         reader: JsonSerial.Reader,
         locator: E444ChanLocator,
@@ -121,6 +140,9 @@ internal object E444ModelMapper {
                 "trip" -> raw.tripcode = reader.nextString()
                 "email" -> raw.email = reader.nextString()
                 "files" -> raw.attachments = readFiles(reader, locator)
+                "answers" -> raw.pollAnswers = readStringArray(reader)
+                "poll_results_exact" -> raw.pollVotes = readIntArray(reader)
+                "reactions" -> raw.reactions = readReactions(reader)
                 else -> reader.skip()
             }
         }
@@ -173,6 +195,43 @@ internal object E444ModelMapper {
         return attachment
     }
 
+    private fun readReactions(reader: JsonSerial.Reader): List<E444Reaction> {
+        val reactions = ArrayList<E444Reaction>()
+        reader.startArray()
+        while (!reader.endStruct()) {
+            var icon: String? = null
+            var count = 0
+            reader.startObject()
+            while (!reader.endStruct()) {
+                when (reader.nextName()) {
+                    "icon" -> icon = reader.nextString()
+                    "count" -> count = reader.nextInt()
+                    else -> reader.skip()
+                }
+            }
+            icon?.let { reactions.add(E444Reaction(it, count)) }
+        }
+        return reactions
+    }
+
+    private fun readStringArray(reader: JsonSerial.Reader): List<String> {
+        val values = ArrayList<String>()
+        reader.startArray()
+        while (!reader.endStruct()) {
+            values.add(reader.nextString())
+        }
+        return values
+    }
+
+    private fun readIntArray(reader: JsonSerial.Reader): List<Int> {
+        val values = ArrayList<Int>()
+        reader.startArray()
+        while (!reader.endStruct()) {
+            values.add(reader.nextInt())
+        }
+        return values
+    }
+
     /**
      * Consumes an array and reports whether it held anything. Used for `file_types`, where only
      * emptiness matters.
@@ -205,6 +264,9 @@ internal object E444ModelMapper {
         var tripcode: String? = null
         var email: String? = null
         var attachments: List<FileAttachment>? = null
+        var pollAnswers: List<String> = emptyList()
+        var pollVotes: List<Int> = emptyList()
+        var reactions: List<E444Reaction> = emptyList()
 
         fun toPost(): Post {
             val post =
@@ -232,7 +294,33 @@ internal object E444ModelMapper {
                 }
             }
             attachments?.let(post::setAttachments)
+            encodeExtra()?.let(post::setExtra)
             return post
+        }
+
+        /**
+         * Packs the poll and reactions into the post's opaque payload, so the decorator gets them
+         * back at display time without a side channel. Answers arrive as HTML.
+         */
+        private fun encodeExtra(): String? {
+            // A poll whose counts do not line up with its answers is dropped rather than shown
+            // wrong, but its post's reactions are still worth keeping.
+            val hasPoll = pollAnswers.isNotEmpty() && pollAnswers.size == pollVotes.size
+            val extra =
+                E444PostExtra(
+                    if (hasPoll) pollAnswers.map { StringUtils.clearHtml(it).trim() } else emptyList(),
+                    if (hasPoll) pollVotes else emptyList(),
+                    reactions,
+                )
+            if (extra.isEmpty) {
+                return null
+            }
+            return try {
+                extra.encode()
+            } catch (e: IOException) {
+                E444ChanPostDecorator.logDecorationFailure("Cannot store post payload", e)
+                null
+            }
         }
 
         private companion object {
