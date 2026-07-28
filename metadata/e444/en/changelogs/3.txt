@@ -1,4 +1,0 @@
-* The per-post navigator menu is back: its sections and buttons are drawn under the post, wrapped to the width there is for them
-* Buttons read at the size posts are read at and follow the app's corner radius, and answer a tap with the app's own ripple
-* A button leading to a thread or a board opens it in the app; only an address the app cannot claim goes to a browser
-* Needs an app build that provides the post decorator API, as the polls and the reactions do

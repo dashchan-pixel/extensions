@@ -1,5 +1,6 @@
 * Post polls are back: every answer shows its share of the vote, and tapping one votes
 * Post reactions are back, with a picker in the post's long-press menu
-* Both are drawn through the app's post decorator API instead of by reflecting into the app
-* Needs an app build that provides that API; on older ones the extension works as before, without polls and reactions
-* The per-post navigator menu is still not included
+* The per-post navigator menu is back: its sections and buttons are drawn under the post, wrapped to the width there is for them
+* All three read at the size posts are read at and follow the app's corner radius, and a button answers a tap with the app's own ripple
+* A menu button leading to a thread or a board opens it in the app; only an address the app cannot claim goes to a browser
+* All three are drawn through the app's post decorator API instead of by reflecting into the app, so they need an app build that provides it -- on an older one the extension works exactly as the previous release did
