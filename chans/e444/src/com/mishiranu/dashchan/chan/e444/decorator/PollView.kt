@@ -108,7 +108,12 @@ internal class PollView(
             val content = LinearLayout(context)
             content.orientation = HORIZONTAL
             content.gravity = Gravity.CENTER_VERTICAL
-            content.setPadding(dp(8), dp(6), dp(8), dp(6))
+            content.setPadding(
+                dp(BAR_SIDE_PADDING_DP),
+                dp(BAR_VERTICAL_PADDING_DP),
+                dp(BAR_SIDE_PADDING_DP),
+                dp(BAR_VERTICAL_PADDING_DP),
+            )
             root.addView(
                 content,
                 FrameLayout.LayoutParams(
@@ -118,14 +123,14 @@ internal class PollView(
             )
             answerView.setSingleLine(true)
             answerView.ellipsize = TextUtils.TruncateAt.END
-            answerView.setTextSize(TypedValue.COMPLEX_UNIT_SP, ANSWER_TEXT_SP)
             content.addView(
                 answerView,
-                LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply { rightMargin = dp(8) },
+                LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply {
+                    rightMargin = dp(RESULT_GAP_DP)
+                },
             )
             resultView.setSingleLine(true)
             resultView.gravity = Gravity.END
-            resultView.setTextSize(TypedValue.COMPLEX_UNIT_SP, RESULT_TEXT_SP)
             content.addView(
                 resultView,
                 LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT),
@@ -149,8 +154,13 @@ internal class PollView(
         ) {
             answerView.text = answer
             answerView.setTextColor(theme.postTextColor)
+            // An answer is read alongside the comment it was polled in, so it is read at the size
+            // the comment is -- which is the user's text scale applied to the app's own dimension,
+            // not a size of this extension's choosing.
+            answerView.setTextSize(TypedValue.COMPLEX_UNIT_PX, theme.postTextSize)
             resultView.text = formatResult(votes, total)
             resultView.setTextColor(theme.metaTextColor)
+            resultView.setTextSize(TypedValue.COMPLEX_UNIT_PX, theme.postTextSize)
             root.background = barBackground(theme, selected)
             fill.background =
                 GradientDrawable().apply {
@@ -220,9 +230,10 @@ internal class PollView(
 
     private companion object {
         const val BAR_GAP_DP = 5
+        const val BAR_SIDE_PADDING_DP = 8
+        const val BAR_VERTICAL_PADDING_DP = 6
+        const val RESULT_GAP_DP = 8
         const val SELECTED_STROKE_DP = 1
-        const val ANSWER_TEXT_SP = 13f
-        const val RESULT_TEXT_SP = 12f
         const val FILL_ALPHA = 0.24f
         const val BACKGROUND_ALPHA = 0.08f
         const val FILL_ANIMATION_MS = 420L

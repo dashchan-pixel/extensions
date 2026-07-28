@@ -102,21 +102,20 @@ internal class ReactionsView(
             root.isClickable = true
             root.isFocusable = true
             root.setPadding(
-                dp(density, 6),
-                dp(density, 4),
-                dp(density, 6),
-                dp(density, 4),
+                dp(density, CHIP_SIDE_PADDING_DP),
+                dp(density, CHIP_VERTICAL_PADDING_DP),
+                dp(density, CHIP_SIDE_PADDING_DP),
+                dp(density, CHIP_VERTICAL_PADDING_DP),
             )
             iconView.scaleType = ImageView.ScaleType.FIT_CENTER
             root.addView(iconView, dp(density, ICON_SIZE_DP), dp(density, ICON_SIZE_DP))
-            countView.setTextSize(TypedValue.COMPLEX_UNIT_SP, COUNT_TEXT_SP)
             root.addView(
                 countView,
                 LinearLayout
                     .LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ).apply { leftMargin = dp(density, 4) },
+                    ).apply { leftMargin = dp(density, COUNT_GAP_DP) },
             )
         }
 
@@ -127,6 +126,9 @@ internal class ReactionsView(
         ) {
             countView.text = reaction.count.toString()
             countView.setTextColor(if (selected) theme.accentColor else theme.metaTextColor)
+            // A chip sits with the post, so its count is read at the size the post is read at,
+            // following the user's text scale rather than a size fixed here.
+            countView.setTextSize(TypedValue.COMPLEX_UNIT_PX, theme.postTextSize)
             val density = root.resources.displayMetrics.density
             root.background =
                 GradientDrawable().apply {
@@ -195,8 +197,10 @@ internal class ReactionsView(
 
     companion object {
         private const val CHIP_GAP_DP = 3
+        private const val CHIP_SIDE_PADDING_DP = 6
+        private const val CHIP_VERTICAL_PADDING_DP = 4
+        private const val COUNT_GAP_DP = 4
         private const val SELECTED_STROKE_DP = 1
-        private const val COUNT_TEXT_SP = 12f
 
         const val ICON_SIZE_DP = 18
 
@@ -206,14 +210,24 @@ internal class ReactionsView(
          */
         private const val PICKER_ICON_SIZE_DP = 24
 
+        /** What turns an icon into a comfortable tap target, and the first thing given up for a fit. */
+        private const val PICKER_CELL_PADDING_DP = 8
+
         /**
-         * How wide a picker cell would like to be: the icon plus 8dp of padding on either side,
-         * which is what makes it a comfortable tap target. [PickerLayout] hands that padding back
-         * when a row would otherwise not hold [PICKER_MIN_COLUMNS] icons.
+         * How wide a picker cell would like to be: the icon plus [PICKER_CELL_PADDING_DP] on either
+         * side. [PickerLayout] hands that padding back when a row would otherwise not hold
+         * [PICKER_MIN_COLUMNS] icons.
          */
-        private const val PICKER_CELL_SIZE_DP = PICKER_ICON_SIZE_DP + 2 * 8
+        private const val PICKER_CELL_SIZE_DP = PICKER_ICON_SIZE_DP + 2 * PICKER_CELL_PADDING_DP
 
         private const val PICKER_GAP_DP = 4
+
+        /**
+         * The gap above the picker separates it from the last menu entry; the one below is the
+         * dialog's own bottom padding, which the footer view replaces.
+         */
+        private const val PICKER_TOP_PADDING_DP = 8
+        private const val PICKER_BOTTOM_PADDING_DP = 16
 
         /**
          * How many icons a row is expected to hold before the cells are allowed to keep their full
@@ -286,7 +300,12 @@ internal class ReactionsView(
             picker.horizontalSpacing = dp(density, PICKER_GAP_DP)
             picker.verticalSpacing = dp(density, PICKER_GAP_DP)
             val sidePadding = menuEntryTextPadding(context, density)
-            picker.setPadding(sidePadding, dp(density, 8), sidePadding, dp(density, 16))
+            picker.setPadding(
+                sidePadding,
+                dp(density, PICKER_TOP_PADDING_DP),
+                sidePadding,
+                dp(density, PICKER_BOTTOM_PADDING_DP),
+            )
             for (icon in icons) {
                 val iconView = ImageView(context)
                 // Every cell is the same fixed size and the drawable is fitted inside it, so icons
