@@ -121,6 +121,14 @@ class ExtensionPlugin : Plugin<Project> {
 			android.buildTypes.apply {
 				getByName("debug") {
 					isMinifyEnabled = false
+					// Tag test builds with the git revision so the installed version is
+					// identifiable, matching the client repo.
+					versionNameSuffix = "-" + project.providers
+							.exec {
+								workingDir(project.rootDir)
+								commandLine("git", "rev-parse", "--short", "HEAD")
+							}
+							.standardOutput.asText.get().trim()
 				}
 				getByName("release") {
 					isMinifyEnabled = true
