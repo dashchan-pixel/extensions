@@ -62,13 +62,13 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7",
-                    "version_code": 1,
+                    "version_name": "26.7.1",
+                    "version_code": 2,
                     "api_version": 1,
                     "min_sdk": 36,
-                    "length": 67714,
-                    "source": "//github.com/dashchan-redacted/extensions/releases/download/kohlchan-26.7/DashchanKohlchan-1.apk",
-                    "sha256sum": "05:D5:17:4B:4A:CD:69:97:33:82:AA:BD:0F:8A:9C:6D:37:87:2B:B0:42:F1:69:EA:AE:39:B7:23:21:ED:F9:72",
+                    "length": 68598,
+                    "source": "//github.com/dashchan-redacted/extensions/releases/download/kohlchan-26.7.1/DashchanKohlchan-2.apk",
+                    "sha256sum": "6F:1F:5F:1D:76:14:03:32:0A:C7:3C:13:2B:DA:2B:8D:1C:D6:08:4D:7A:40:C3:62:42:66:C4:0E:27:F0:91:9F",
                     "fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
                 }
             ]
