@@ -1,0 +1,3 @@
+* A post the site refused is no longer reported as sent: the reason it gives is shown instead, and a refused captcha is retried with a fresh one
+* Deleting and reporting posts work — the request never named which of the two it was, and the site turned it down unread
+* A reply now carries its own number back, so the client can find the post that was just made

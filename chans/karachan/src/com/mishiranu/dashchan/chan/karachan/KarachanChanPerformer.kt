@@ -115,34 +115,81 @@ class KarachanChanPerformer : ChanPerformer() {
                 .setSuccessOnly(false)
                 .perform()
         val responseText = response.readString()
-        // A successful post answers with a jump back to the thread, which is the only place the
-        // new numbers appear. Redirects are not followed, so the header carries it.
-        val threadPath =
+        // Where the answer sends the browser is the only thing that tells a post that was taken
+        // from one that was refused: the engine writes both as an ordinary page, and prints the
+        // very sentence that announces a success into the element a refusal uses. Redirects are
+        // not followed, so a header carries the destination as well as the page's own refresh.
+        val targets =
             listOfNotNull(
                 response.redirectedUri?.toString(),
                 locationHeader(response),
                 extractRefreshTarget(responseText),
-            ).firstNotNullOfOrNull { extractThreadPath(it) }
-        if (threadPath == null) {
-            // Nowhere to go means the post was not accepted, and the page says why. Checking the
-            // message only now keeps a success that happens to carry one from being mistaken for
-            // a failure.
-            extractErrorMessage(responseText)?.let { throw ApiException(it) }
-            response.checkResponseCode()
-            // A new thread bounces back to the board index, which names neither number, so the
-            // client reloads the board and finds the thread itself.
-            return SendPostResult(null, null)
+            )
+        // A jump into a thread is the only answer that names the new post.
+        targets.firstNotNullOfOrNull { extractThreadPath(it) }?.let { threadPath ->
+            return buildSendPostResult(locator, data, threadPath)
         }
-        val targetUri = locator.buildPath(threadPath)
+        // A post the engine will not point at still went through: it returns to the board when the
+        // e-mail field asks it not to follow the post, as "nonoko" does.
+        if (targets.any { leadsToBoard(it, data.boardName) }) {
+            return SendPostResult(data.threadNumber, null)
+        }
+        // Nowhere to go means the post was not taken, and reporting it as sent is worse than any
+        // error: the client closes the form and drops the draft over a post the board never saw.
+        response.checkResponseCode()
+        refuse(targets, responseText)
+    }
+
+    /** Reads the numbers of the new post off the thread page the answer points at. */
+    private fun buildSendPostResult(
+        locator: KarachanChanLocator,
+        data: SendPostData,
+        threadPath: String,
+    ): SendPostResult {
+        // The anchor cannot be appended as part of the path: it would be read back as part of a
+        // file name rather than as a fragment, hiding the post number the answer just gave.
+        val targetUri =
+            locator
+                .buildPath(threadPath.substringBefore('#'))
+                .buildUpon()
+                .fragment(StringUtils.nullIfEmpty(threadPath.substringAfter('#', "")))
+                .build()
         val threadNumber = locator.getThreadNumber(targetUri) ?: data.threadNumber
         val postNumber = locator.getPostNumber(targetUri)
         return SendPostResult(threadNumber, postNumber.takeIf { it != threadNumber })
     }
 
+    /**
+     * Names why a post was refused. A refusal the page does not explain is still reported as a
+     * failure rather than passed off as a post.
+     */
+    @Throws(ApiException::class, InvalidResponseException::class)
+    private fun refuse(
+        targets: List<String>,
+        responseText: String,
+    ): Nothing {
+        // The spam filter bans instead of answering, and says so only by where it sends the
+        // browser afterwards.
+        if (targets.any { BANNED_PATH.matcher(it).find() }) {
+            throw ApiException(ApiException.SEND_ERROR_BANNED)
+        }
+        val message =
+            extractErrorMessage(responseText)
+                ?: extractFallbackMessage(responseText)
+                ?: throw InvalidResponseException()
+        // A refused captcha is the one refusal the client can act on by itself: it drops the spent
+        // token, takes a fresh one and offers the post again. Reported as a sentence it would only
+        // reach the user, who has no way to mint another.
+        if (CAPTCHA_REFUSAL.matcher(message).find()) {
+            throw ApiException(ApiException.SEND_ERROR_CAPTCHA)
+        }
+        throw ApiException(message)
+    }
+
     private fun buildPostEntity(data: SendPostData): MultipartEntity {
         val configuration = ChanConfiguration.get(this) as KarachanChanConfiguration
         val entity = MultipartEntity()
-        entity.add("mode", "regist")
+        entity.add("mode", POST_MODE)
         entity.add("board", data.boardName)
         // A reply names its thread, a new thread replies to nothing.
         entity.add("resto", data.threadNumber ?: "0")
@@ -198,6 +245,7 @@ class KarachanChanPerformer : ChanPerformer() {
     @Throws(HttpException::class, ApiException::class, InvalidResponseException::class)
     override fun onSendDeletePosts(data: SendDeletePostsData): SendDeletePostsResult {
         val entity = MultipartEntity()
+        entity.add("mode", USER_FORM_MODE)
         entity.add("board", data.boardName)
         entity.add("pwd", data.password)
         entity.add("delete", "1")
@@ -216,6 +264,7 @@ class KarachanChanPerformer : ChanPerformer() {
     @Throws(HttpException::class, ApiException::class, InvalidResponseException::class)
     override fun onSendReportPosts(data: SendReportPostsData): SendReportPostsResult {
         val entity = MultipartEntity()
+        entity.add("mode", USER_FORM_MODE)
         entity.add("board", data.boardName)
         entity.add("report", "1")
         entity.add("reason", StringUtils.emptyIfNull(data.comment))
@@ -289,6 +338,11 @@ class KarachanChanPerformer : ChanPerformer() {
         }
     }
 
+    /**
+     * Reads the sentence a page devoted to a refusal carries, which is the message the site itself
+     * would show. Only the element the engine holds it in counts here, since deletion and reporting
+     * answer with sentences of their own that are not failures.
+     */
     private fun extractErrorMessage(responseText: String): String? {
         val matcher = ERROR_MESSAGE.matcher(responseText)
         return if (matcher.find()) {
@@ -296,6 +350,34 @@ class KarachanChanPerformer : ChanPerformer() {
         } else {
             null
         }
+    }
+
+    /**
+     * Names a refusal the engine wrote without its usual message element: a heading, the title of
+     * the page it answered with, or, where the script turned the request down before assembling a
+     * page at all, the bare sentence that is the whole of it.
+     */
+    private fun extractFallbackMessage(responseText: String): String? {
+        for (pattern in FALLBACK_MESSAGES) {
+            val matcher = pattern.matcher(responseText)
+            if (matcher.find()) {
+                StringUtils.nullIfEmpty(StringUtils.clearHtml(matcher.group(1)).trim())?.let { return it }
+            }
+        }
+        val text = StringUtils.clearHtml(responseText).trim()
+        return if (text.length <= MAX_BARE_MESSAGE_LENGTH) StringUtils.nullIfEmpty(text) else null
+    }
+
+    /** Whether a location leads to the index of the board a post was written on. */
+    private fun leadsToBoard(
+        location: String,
+        boardName: String?,
+    ): Boolean {
+        if (boardName == null) {
+            return false
+        }
+        val matcher = BOARD_INDEX_PATH.matcher(location)
+        return matcher.find() && matcher.group(1) == boardName
     }
 
     /** A page that only jumps elsewhere says so with a refresh instruction. */
@@ -321,12 +403,37 @@ class KarachanChanPerformer : ChanPerformer() {
         private const val FALLBACK_BOARD_NAME = "b"
 
         /**
+         * The single script behind posting, deletion and reporting refuses outright a request that
+         * does not name which of them it is, so the mode the form carries is sent with it.
+         */
+        private const val POST_MODE = "regist"
+        private const val USER_FORM_MODE = "usrform"
+
+        /**
          * The fork names the element holding a refusal `message`, where the engine it grew out of
-         * used `errmsg`. Both are accepted so neither spelling produces a silent failure.
+         * used `errmsg`. Both are accepted so neither spelling produces a silent failure, and the
+         * element is not required to be a span: the tag has changed between the two.
          */
         private val ERROR_MESSAGE =
-            Pattern.compile("id=\"(?:message|errmsg)\"[^>]*>(.*?)</span>", Pattern.DOTALL)
+            Pattern.compile("id=\"(?:message|errmsg)\"[^>]*>(.*?)</\\w+>", Pattern.DOTALL)
+
+        private val FALLBACK_MESSAGES =
+            listOf(
+                Pattern.compile("<h1[^>]*>(.*?)</h1>", Pattern.DOTALL or Pattern.CASE_INSENSITIVE),
+                Pattern.compile("<title[^>]*>(.*?)</title>", Pattern.DOTALL or Pattern.CASE_INSENSITIVE),
+            )
+
+        /** Longer than this the page is a page, not a sentence standing in for one. */
+        private const val MAX_BARE_MESSAGE_LENGTH = 200
+
+        /** Any wording of a refused captcha names it, in any language the site is written in. */
+        private val CAPTCHA_REFUSAL = Pattern.compile("captcha", Pattern.CASE_INSENSITIVE)
+
         private val REFRESH_URI = Pattern.compile("http-equiv=\"refresh\"[^>]*?URL=['\"]?([^'\">]+)", Pattern.CASE_INSENSITIVE)
         private val FILE_PATH = Pattern.compile("([\\w$*]+/res/\\d+(?:-\\d+)?\\.html(?:#[pq]?\\d+)?)")
+        private val BOARD_INDEX_PATH = Pattern.compile("([\\w$*]+)/(?:index|\\d+)\\.html")
+
+        /** Where the spam filter sends a poster it has just banned. */
+        private val BANNED_PATH = Pattern.compile("(?:^|/)banned\\.php")
     }
 }
