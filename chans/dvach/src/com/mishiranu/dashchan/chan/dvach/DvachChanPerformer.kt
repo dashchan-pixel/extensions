@@ -992,7 +992,12 @@ class DvachChanPerformer : ChanPerformer() {
         if (data.optionOriginalPoster) {
             entity.add("op_mark", "1")
         }
-        data.attachments?.forEach { it.addToEntity(entity, "file[]") }
+        data.attachments?.forEachIndexed { index, attachment ->
+            attachment.addToEntity(entity, "file[]")
+            if (attachment.optionSpoiler) {
+                entity.add("file_${index}_nsfw", "1")
+            }
+        }
         entity.add("icon", data.userIcon)
 
         var captchaPassCookie: String? = null

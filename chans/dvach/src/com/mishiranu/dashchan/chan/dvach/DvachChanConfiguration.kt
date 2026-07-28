@@ -74,6 +74,7 @@ class DvachChanConfiguration : ChanConfiguration() {
             attachmentMimeTypes.add("image/*")
             attachmentMimeTypes.add("video/webm")
             attachmentMimeTypes.add("video/mp4")
+            attachmentSpoiler = true
             try {
                 val jsonArray = JSONArray(get(boardName, KEY_ICONS, "[]"))
                 for (i in 0 until jsonArray.length()) {

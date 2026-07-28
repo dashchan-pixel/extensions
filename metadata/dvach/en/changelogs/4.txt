@@ -1,0 +1,1 @@
+* Attachments can be marked as a spoiler when posting
