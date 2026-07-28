@@ -98,13 +98,13 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7",
-                    "version_code": 1,
+                    "version_name": "26.7.1",
+                    "version_code": 2,
                     "api_version": 1,
                     "min_sdk": 36,
-                    "length": 64042,
-                    "source": "//github.com/dashchan-redacted/extensions/releases/download/karachan-26.7/DashchanKarachan-1.apk",
-                    "sha256sum": "37:A9:F3:51:56:89:34:7C:7E:ED:41:D6:83:B3:31:85:D9:B6:C1:D0:C3:6C:43:D6:4C:40:71:7B:5C:21:EC:29",
+                    "length": 65742,
+                    "source": "//github.com/dashchan-redacted/extensions/releases/download/karachan-26.7.1/DashchanKarachan-2.apk",
+                    "sha256sum": "2B:C8:58:86:88:43:BC:4F:59:B4:31:D9:47:83:C5:EE:30:8E:BB:6F:A7:05:F5:E8:51:95:41:45:5C:D5:D7:78",
                     "fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
                 }
             ]
