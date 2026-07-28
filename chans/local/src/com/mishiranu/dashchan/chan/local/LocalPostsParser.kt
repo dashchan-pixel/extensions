@@ -19,15 +19,6 @@ class LocalPostsParser(
 ) : GroupParser.Callback {
     private val locator = ChanLocator.get<LocalChanLocator>(linked)
 
-    /**
-     * The archive HTML names its media relative to its own directory (`<archive name>/src/...`),
-     * while [onReadContent][LocalChanPerformer.onReadContent] resolves paths from the archive root.
-     * For a thread inside a subdirectory the two differ by exactly the directory part of the thread
-     * number, so put that back in front. Empty — and byte for byte the old URIs — at the root.
-     */
-    private val directoryPrefix =
-        threadNumber.substringBeforeLast('/', "").let { if (it.isEmpty()) "" else "$it/" }
-
     private var onlyOriginalPost = false
     private var parent: String? = null
     private var threadUri: Uri? = null
@@ -116,13 +107,9 @@ class LocalPostsParser(
             attributes.get("data-width")?.let { attachment!!.setWidth(it.toInt()) }
             attributes.get("data-height")?.let { attachment!!.setHeight(it.toInt()) }
             if (attributes.get("data-icon") != null) {
-                // The icon is stored under the archive's own thumbnail directory, so its path needs
-                // the same treatment as an attachment's rather than being taken as it is written.
                 val src = attributes.get("src")
-                if (src != null) {
-                    val title = StringUtils.clearHtml(attributes.get("title"))
-                    icons.add(Icon(locator, createFileUriLocal(src), title))
-                }
+                val title = StringUtils.clearHtml(attributes.get("title"))
+                icons.add(Icon(locator, Uri.parse(src), title))
             }
             if (attributes.get("data-subject") != null) {
                 expect = EXPECT_SUBJECT
@@ -181,7 +168,7 @@ class LocalPostsParser(
                 .Builder()
                 .scheme("http")
                 .authority("localhost")
-                .path(directoryPrefix + uri.path)
+                .path(uri.path)
                 .build()
         } else {
             uri

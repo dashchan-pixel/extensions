@@ -15,16 +15,14 @@ class UriHandlerActivity : Activity() {
         if (uri != null) {
             val segments = uri.pathSegments
             if (segments != null) {
-                // Everything below the archive directory is the thread's path relative to the
-                // archive root, which is how the local chan names its threads — so a file the user
-                // filed away in a subdirectory opens like one sitting at the top. Taking the last
-                // "Archive" keeps a flat archive working even when the download directory sits
-                // under one of its own.
+                // The archive directory does not have to be the immediate parent: the local chan
+                // names a thread after the archive's file name wherever in the archive the user
+                // filed it away, so anything below Archive opens, and the name is the last segment
+                // either way.
                 val index = segments.lastIndexOf(DIRECTORY_ARCHIVE)
                 if (index >= 0 && index + 1 < segments.size) {
                     // pathSegments are decoded, and the synthetic URI below is parsed from a string.
-                    val origin =
-                        segments.subList(index + 1, segments.size).joinToString("/") { Uri.encode(it) }
+                    val origin = Uri.encode(segments[segments.size - 1])
                     // Internal synthetic URI used by LocalChanPerformer customUriHandler for local resources
                     val handleIntent = Intent(ACTION).setData(Uri.parse("http://localhost/null/res/$origin"))
                     intent.extras?.let { handleIntent.putExtras(it) }
