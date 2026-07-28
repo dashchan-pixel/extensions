@@ -616,6 +616,26 @@ class Post : Comparable<Post> {
         }
 
     /**
+     * Return the opaque payload stored by [setExtra].
+     *
+     * @return Stored payload, or `null` if none was stored.
+     */
+    fun getExtra(): String? = BuildConfig.Private.expr()
+
+    /**
+     * Store an opaque payload the client keeps with this post and hands back to your
+     * [chan.content.ChanPostDecorator] when the post is displayed. The client never parses it, so
+     * any self-describing encoding works; [chan.text.JsonSerial] is the intended one.
+     *
+     * The payload is written to the post cache along with the rest of the post, so it survives an
+     * application restart. Keep it small: it is held in memory for every loaded post.
+     *
+     * @param extra Payload to store, or `null` to store none.
+     * @return This model.
+     */
+    fun setExtra(extra: String?): Post = BuildConfig.Private.expr(extra)
+
+    /**
      * Compares this post with specified post.
      *
      * @param other Post to compare with.

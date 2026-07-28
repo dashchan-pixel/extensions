@@ -40,6 +40,14 @@ class ExtensionPlugin : Plugin<Project> {
 
 			val requiredClasses = listOf("ChanConfiguration", "ChanLocator", "ChanMarkup", "ChanPerformer")
 					.map { "$packageName.$chanNameUpper$it" }
+			// Optional, so it is kept out of requiredClasses: every extension without the class must
+			// still generate a manifest, keep rules and a BuildConfig that do not mention it.
+			val optionalClasses = if (chan.postDecorator) {
+				listOf("$packageName.${chanNameUpper}ChanPostDecorator")
+			} else {
+				emptyList()
+			}
+			val usedClasses = requiredClasses + optionalClasses
 
 			val xml = buildString {
 				append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
@@ -62,6 +70,10 @@ class ExtensionPlugin : Plugin<Project> {
 				append("android:value=\".${chanNameUpper}ChanLocator\" />\n")
 				append("<meta-data android:name=\"chan.extension.class.markup\" ")
 				append("android:value=\".${chanNameUpper}ChanMarkup\" />\n")
+				if (chan.postDecorator) {
+					append("<meta-data android:name=\"chan.extension.class.postdecorator\" ")
+					append("android:value=\".${chanNameUpper}ChanPostDecorator\" />\n")
+				}
 				append("<activity android:name=\"chan.application.UriHandlerActivity\" ")
 				append("android:label=\"Dashchan\" android:exported=\"true\" ")
 				append("android:theme=\"@android:style/Theme.NoDisplay\">\n")
@@ -84,7 +96,7 @@ class ExtensionPlugin : Plugin<Project> {
 			ProjectConfiguration.configureManifest(project, xml)
 
 			val proguard = "-dontobfuscate\n" +
-					requiredClasses.joinToString("") { "-keep class $it { *; }\n" }
+					usedClasses.joinToString("") { "-keep class $it { *; }\n" }
 			val proguardFile = project.layout.buildDirectory
 					.file("generated/proguard-rules.pro").get().asFile
 			val generateProguard = project.tasks.register("generateProguard", GenerateFileTask::class.java) {
@@ -103,7 +115,7 @@ class ExtensionPlugin : Plugin<Project> {
 				this.versionName = versionName
 				targetSdk = ProjectConfiguration.TARGET_SDK
 				buildConfigField("Class[]", "USED_CLASSES",
-						"{" + requiredClasses.joinToString(", ") { "$it.class" } + "}")
+						"{" + usedClasses.joinToString(", ") { "$it.class" } + "}")
 			}
 			android.buildFeatures.buildConfig = true
 			android.buildTypes.apply {
