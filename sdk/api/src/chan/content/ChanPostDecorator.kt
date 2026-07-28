@@ -110,8 +110,8 @@ open class ChanPostDecorator {
     }
 
     /**
-     * Host colors resolved from the current theme, so your views can match the client without
-     * guessing at its resources.
+     * Host colors and metrics resolved from the current theme and the user's preferences, so your
+     * views can match the client without guessing at its resources.
      */
     class PostTheme private constructor() {
         @JvmField
@@ -128,6 +128,23 @@ open class ChanPostDecorator {
 
         @JvmField
         val windowBackgroundColor: Int = BuildConfig.Private.expr()
+
+        /**
+         * The size of a post's comment text, in pixels, with the user's text scale already applied.
+         * Pass it to [android.widget.TextView.setTextSize] with
+         * [android.util.TypedValue.COMPLEX_UNIT_PX]: text of your own that sits with the post reads
+         * as part of it only at the size the post itself is drawn at.
+         */
+        @JvmField
+        val postTextSize: Float = BuildConfig.Private.expr()
+
+        /**
+         * The corner radius the client rounds its own surfaces to, in pixels, following the user's
+         * preference -- which they may have set to none. Pass it to
+         * [android.graphics.drawable.GradientDrawable.setCornerRadius].
+         */
+        @JvmField
+        val cornerRadius: Float = BuildConfig.Private.expr()
     }
 
     /**
@@ -153,7 +170,12 @@ open class ChanPostDecorator {
         )
 
         /**
-         * Open `uri` the way the client opens a link the user clicked.
+         * Open `uri` the way the client opens a link the user clicked: a board or a thread of a chan
+         * the client knows is opened inside the client, and anything else in a browser. Unlike a
+         * clicked link it is not confirmed first, because your view is a control the user aimed at
+         * rather than a link that happened to be in the text.
+         *
+         * Pass an absolute uri -- a relative one belongs to no host, so nothing can claim it.
          *
          * @param uri Uri to open.
          */
