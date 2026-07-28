@@ -1,0 +1,5 @@
+* New extension for karachan.org
+* Written in Kotlin for the site's Mitsuba engine, which publishes no API: boards, catalog, threads and posts are all read from the pages themselves
+* Boards keep their own categories, and the ones named $ and * are reachable like any other
+* Posting, deleting and reporting work, including the invisible captcha the site asks for
+* Embedded videos are shown as attachments instead of bare links
