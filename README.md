@@ -1,8 +1,8 @@
 # Dashchan Extensions
 
 The extension APKs for [dashchan-redacted/client](https://github.com/dashchan-redacted/client),
-trimmed to **dvach**, **fourchan**, **endchan**, **arhivach** and **local**. Each extension is a
-separate APK the client loads dynamically.
+a subset of the upstream set. Each extension is a separate APK the client loads dynamically; the
+ones this repository carries are the directories under `chans/`.
 
 ## Building Guide
 
