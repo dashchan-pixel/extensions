@@ -36,6 +36,11 @@ internal class MenuView(
 
     init {
         orientation = VERTICAL
+        // Every section leads with a gap, so the menu has to end with one too: what follows it in
+        // the decorated post is the reactions row, which would otherwise sit against the last row
+        // of buttons. The poll gets away without one because each of its bars carries the same gap
+        // below it, the last one included.
+        setPadding(0, 0, 0, dp(resources.displayMetrics.density, SECTION_GAP_DP))
     }
 
     fun bind(
