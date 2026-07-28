@@ -11,18 +11,41 @@ class KarachanChanLocator : ChanLocator() {
         setHttpsMode(HttpsMode.HTTPS_ONLY)
     }
 
-    override fun isBoardUri(uri: Uri): Boolean = isChanHostOrRelative(uri) && isPathMatches(uri, BOARD_PATH)
+    override fun isBoardUri(uri: Uri): Boolean = isChanHostOrRelative(uri) && matches(uri, BOARD_PATH)
 
-    override fun isThreadUri(uri: Uri): Boolean = isChanHostOrRelative(uri) && isPathMatches(uri, THREAD_PATH)
+    override fun isThreadUri(uri: Uri): Boolean = isChanHostOrRelative(uri) && matches(uri, THREAD_PATH)
 
-    override fun isAttachmentUri(uri: Uri): Boolean = isChanHostOrRelative(uri) && isPathMatches(uri, ATTACHMENT_PATH)
+    override fun isAttachmentUri(uri: Uri): Boolean = isChanHostOrRelative(uri) && matches(uri, ATTACHMENT_PATH)
 
-    override fun getBoardName(uri: Uri): String? {
-        val segments = uri.pathSegments
-        return if (segments.isNotEmpty()) segments[0] else null
+    override fun getBoardName(uri: Uri): String? = chanPath(uri)?.split('/')?.firstOrNull { it.isNotEmpty() }
+
+    override fun getThreadNumber(uri: Uri): String? = getGroupValue(chanPath(uri), THREAD_PATH, 1)
+
+    private fun matches(
+        uri: Uri,
+        pattern: Pattern,
+    ): Boolean {
+        val path = chanPath(uri) ?: return false
+        return pattern.matcher(path).matches()
     }
 
-    override fun getThreadNumber(uri: Uri): String? = getGroupValue(uri.path, THREAD_PATH, 1)
+    /**
+     * The site writes its links relative to the page they sit on, as `../../b/res/1.html`. What
+     * resolves them keeps the parent segments rather than walking them off, so a path is read
+     * from the board segment onwards instead of being anchored at the root, which would never
+     * match a link a post links with.
+     */
+    private fun chanPath(uri: Uri): String? {
+        var path = uri.path ?: return null
+        while (true) {
+            val shorter = path.removePrefix("/").removePrefix("./").removePrefix("../")
+            if (shorter == path) {
+                break
+            }
+            path = shorter
+        }
+        return "/$path"
+    }
 
     /**
      * Post anchors come in two flavours: `#p<number>` from the "No." link and `#q<number>` from

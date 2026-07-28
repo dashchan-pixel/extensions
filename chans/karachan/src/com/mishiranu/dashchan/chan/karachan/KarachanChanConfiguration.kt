@@ -4,6 +4,9 @@ import chan.content.ChanConfiguration
 
 class KarachanChanConfiguration : ChanConfiguration() {
     init {
+        // A quote link into another thread can be shown as a card, which needs that one post to
+        // be readable on its own.
+        request(OPTION_READ_SINGLE_POST)
         setDefaultName(DEFAULT_NAME)
         setBumpLimitMode(BumpLimitMode.AFTER_REPLY)
         // The site guards posting with an invisible reCAPTCHA: its key is refused by the checkbox

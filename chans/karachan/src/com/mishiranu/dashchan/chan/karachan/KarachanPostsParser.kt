@@ -99,6 +99,14 @@ class KarachanPostsParser(
         return if (matcher.find()) locator.buildPath(matcher.group(1)) else null
     }
 
+    /**
+     * A quote link is labelled `>>1234 (OP)` where it points at the thread's own first post, and
+     * the client only treats a link as a reference when its text is a number and nothing else.
+     * The label is dropped rather than kept: the client marks such a link itself, as it does for
+     * one leading into another thread, so keeping this one would say the same thing twice.
+     */
+    private fun normalizeComment(comment: String): String = QUOTE_LINK_LABEL.matcher(comment).replaceAll("$1$3")
+
     private fun parseFileMetadata(text: String) {
         val attachment = this.attachment ?: return
         DOWNLOAD_NAME.matcher(text).takeIf { it.find() }?.let {
@@ -153,6 +161,14 @@ class KarachanPostsParser(
          */
         private val THREAD_ID = Pattern.compile("^t(\\d+)$")
         private val POST_CONTAINER_ID = Pattern.compile("^pc(\\d+)$")
+
+        /**
+         * A quote link, its numeric label, and a note appended after it. The note has to start
+         * with something other than a digit: allowing any character lets the number itself be
+         * split, since the expression would rather give up its last digit than fail to match.
+         */
+        private val QUOTE_LINK_LABEL =
+            Pattern.compile("(<a\\b[^>]*class=\"quotelink\"[^>]*>(?:&gt;|>){2}\\d+)([^\\d<][^<]*)(</a>)")
 
         private val POST_IDENTIFIER = Pattern.compile("([\\w.+/-]{6,})\\s*\\)?\\s*$")
         private val OMITTED_POSTS = Pattern.compile("^\\s*(\\d+)")
@@ -284,7 +300,7 @@ class KarachanPostsParser(
                     holder.insideFile = false
                     holder.post != null
                 }.content { _, holder, text ->
-                    holder.post?.comment = StringUtils.nullIfEmpty(text.trim())
+                    holder.post?.comment = StringUtils.nullIfEmpty(holder.normalizeComment(text.trim()))
                 }.equals("span", "class", "summary")
                 .open { _, holder, _, _ -> holder.threadsMode }
                 .content { _, holder, text ->

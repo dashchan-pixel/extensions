@@ -56,6 +56,31 @@ class KarachanChanPerformer : ChanPerformer() {
         return ReadPostsResult(posts)
     }
 
+    /**
+     * A quote link may point into a thread that is not open, so that one post has to be readable
+     * on its own. The site publishes no endpoint for a single post, but the link naming the card
+     * also names its thread, and a thread page carries every post it holds.
+     */
+    @Throws(HttpException::class, InvalidResponseException::class)
+    override fun onReadSinglePost(data: ReadSinglePostData): ReadSinglePostResult {
+        val locator = ChanLocator.get(this) as KarachanChanLocator
+        // Without the thread there is nothing to fetch: a post cannot be located on its own.
+        val threadNumber = data.threadNumber ?: throw HttpException.createNotFoundException()
+        val responseText = HttpRequest(locator.createThreadUri(data.boardName, threadNumber), data).perform().readString()
+        val posts =
+            try {
+                KarachanPostsParser(this, data.boardName).convertPosts(responseText)
+            } catch (e: ParseException) {
+                throw InvalidResponseException(e)
+            }
+        val post =
+            posts.find { it.postNumber == data.postNumber }
+                // The thread is there but the post has gone from it, which is a missing post
+                // rather than a response that could not be understood.
+                ?: throw HttpException.createNotFoundException()
+        return ReadSinglePostResult(post)
+    }
+
     @Throws(HttpException::class, InvalidResponseException::class)
     override fun onReadBoards(data: ReadBoardsData): ReadBoardsResult {
         val locator = ChanLocator.get(this) as KarachanChanLocator
