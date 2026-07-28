@@ -31,6 +31,11 @@
 
 # 4. Ignore build artifacts and cache within allowed directories
 **/build/
+# ...except the convention plugins, whose Kotlin package is literally named
+# "build", so **/build/ hides the sources. They are tracked, which made every
+# edit to them need "git add -f". Re-include the directory itself: a negation
+# of a file inside an excluded directory would have no effect.
+!/build-logic/src/main/kotlin/chan/build/
 **/.gradle/
 *.apk
 *.aar
