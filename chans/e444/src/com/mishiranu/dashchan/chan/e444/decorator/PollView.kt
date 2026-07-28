@@ -155,7 +155,7 @@ internal class PollView(
             fill.background =
                 GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
-                    cornerRadius = dp(CORNER_RADIUS_DP).toFloat()
+                    cornerRadius = theme.cornerRadius
                     setColor(applyAlpha(theme.accentColor, FILL_ALPHA))
                 }
             val ratio = if (total > 0) votes.toFloat() / total else 0f
@@ -202,7 +202,7 @@ internal class PollView(
         ): GradientDrawable =
             GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                cornerRadius = dp(CORNER_RADIUS_DP).toFloat()
+                cornerRadius = theme.cornerRadius
                 setColor(applyAlpha(theme.postTextColor, BACKGROUND_ALPHA))
                 if (selected) {
                     setStroke(dp(SELECTED_STROKE_DP), theme.accentColor)
@@ -220,7 +220,6 @@ internal class PollView(
 
     private companion object {
         const val BAR_GAP_DP = 5
-        const val CORNER_RADIUS_DP = 5
         const val SELECTED_STROKE_DP = 1
         const val ANSWER_TEXT_SP = 13f
         const val RESULT_TEXT_SP = 12f

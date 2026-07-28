@@ -10,8 +10,21 @@ internal class E444Reaction(
     val count: Int,
 )
 
+/** One button of a post's menu: what it says and where it goes. */
+internal class E444MenuLink(
+    val label: String,
+    val url: String,
+)
+
+/** One group of a post's menu buttons, under the heading the poster gave it. */
+internal class E444MenuSection(
+    val name: String,
+    val links: List<E444MenuLink>,
+)
+
 /**
- * The parts of a post the common post model has no room for -- its poll and its reactions.
+ * The parts of a post the common post model has no room for -- its poll, its reactions and its
+ * menu.
  *
  * This travels as the post's opaque payload
  * ([chan.content.model.Post.setExtra] / [chan.content.ChanPostDecorator]), which the client stores
@@ -23,9 +36,10 @@ internal class E444PostExtra(
     val pollAnswers: List<String>,
     val pollVotes: List<Int>,
     val reactions: List<E444Reaction>,
+    val menu: List<E444MenuSection>,
 ) {
     val isEmpty: Boolean
-        get() = pollAnswers.isEmpty() && reactions.isEmpty()
+        get() = pollAnswers.isEmpty() && reactions.isEmpty() && menu.isEmpty()
 
     /** Total votes across every answer, for turning a vote count into a share of the poll. */
     val pollTotalVotes: Int
@@ -63,6 +77,28 @@ internal class E444PostExtra(
                 }
                 it.endArray()
             }
+            if (menu.isNotEmpty()) {
+                it.name(NAME_MENU)
+                it.startArray()
+                for (section in menu) {
+                    it.startObject()
+                    it.name(NAME_SECTION_NAME)
+                    it.value(section.name)
+                    it.name(NAME_LINKS)
+                    it.startArray()
+                    for (link in section.links) {
+                        it.startObject()
+                        it.name(NAME_LABEL)
+                        it.value(link.label)
+                        it.name(NAME_URL)
+                        it.value(link.url)
+                        it.endObject()
+                    }
+                    it.endArray()
+                    it.endObject()
+                }
+                it.endArray()
+            }
             it.endObject()
             it.flush()
             return String(it.build(), Charsets.UTF_8)
@@ -76,7 +112,19 @@ internal class E444PostExtra(
         private const val NAME_ICON = "icon"
         private const val NAME_COUNT = "count"
 
-        val EMPTY = E444PostExtra(emptyList(), emptyList(), emptyList())
+        /**
+         * The menu is written back under the names the board itself uses for it, so that
+         * [readMenu] can serve both this payload and the response it was parsed out of. The two
+         * copies of the reaction reader below are the alternative, and a menu is three levels
+         * deep.
+         */
+        private const val NAME_MENU = "menu"
+        private const val NAME_SECTION_NAME = "sectionName"
+        private const val NAME_LINKS = "links"
+        private const val NAME_LABEL = "label"
+        private const val NAME_URL = "url"
+
+        val EMPTY = E444PostExtra(emptyList(), emptyList(), emptyList(), emptyList())
 
         /**
          * Rebuilds a payload written by [encode].
@@ -105,6 +153,7 @@ internal class E444PostExtra(
             val pollAnswers = ArrayList<String>()
             val pollVotes = ArrayList<Int>()
             val reactions = ArrayList<E444Reaction>()
+            var menu: List<E444MenuSection> = emptyList()
             reader.startObject()
             while (!reader.endStruct()) {
                 when (reader.nextName()) {
@@ -129,16 +178,83 @@ internal class E444PostExtra(
                         }
                     }
 
+                    NAME_MENU -> menu = readMenu(reader)
+
                     else -> reader.skip()
                 }
             }
             // A poll with fewer counts than answers would misreport every share, so treat a
             // mismatched pair as no poll at all.
             return if (pollAnswers.size == pollVotes.size) {
-                E444PostExtra(pollAnswers, pollVotes, reactions)
+                E444PostExtra(pollAnswers, pollVotes, reactions, menu)
             } else {
-                E444PostExtra(emptyList(), emptyList(), reactions)
+                E444PostExtra(emptyList(), emptyList(), reactions, menu)
             }
+        }
+
+        /**
+         * Reads a post's menu: the board's navigation buttons, grouped into sections.
+         *
+         * Shared with [E444ModelMapper], which meets the same structure under the same names in a
+         * post response.
+         *
+         * Labels and headings arrive as text rather than as HTML -- the board's own pages escape
+         * them when they build the buttons -- so nothing is stripped out of them here.
+         */
+        @Throws(IOException::class, ParseException::class)
+        fun readMenu(reader: JsonSerial.Reader): List<E444MenuSection> {
+            val sections = ArrayList<E444MenuSection>()
+            reader.startArray()
+            while (!reader.endStruct()) {
+                readMenuSection(reader)?.let(sections::add)
+            }
+            return sections
+        }
+
+        @Throws(IOException::class, ParseException::class)
+        private fun readMenuSection(reader: JsonSerial.Reader): E444MenuSection? {
+            var name: String? = null
+            val links = ArrayList<E444MenuLink>()
+            reader.startObject()
+            while (!reader.endStruct()) {
+                when (reader.nextName()) {
+                    NAME_SECTION_NAME -> name = reader.nextString()
+                    NAME_LINKS -> {
+                        reader.startArray()
+                        while (!reader.endStruct()) {
+                            readMenuLink(reader)?.let(links::add)
+                        }
+                    }
+
+                    else -> reader.skip()
+                }
+            }
+            // A heading on its own has nothing to head, and the board draws such a section as an
+            // empty row.
+            return if (links.isEmpty()) null else E444MenuSection(name.orEmpty().trim(), links)
+        }
+
+        @Throws(IOException::class, ParseException::class)
+        private fun readMenuLink(reader: JsonSerial.Reader): E444MenuLink? {
+            var label: String? = null
+            var url: String? = null
+            reader.startObject()
+            while (!reader.endStruct()) {
+                when (reader.nextName()) {
+                    NAME_LABEL -> label = reader.nextString()
+                    NAME_URL -> url = reader.nextString()
+                    else -> reader.skip()
+                }
+            }
+            // A button with no address cannot go anywhere, so it is dropped rather than drawn dead.
+            // One with no label is kept and titled by its address: it does lead somewhere, and an
+            // unlabelled button is invisible here in a way the board's fixed-size cell is not.
+            val address = url?.trim().orEmpty()
+            if (address.isEmpty()) {
+                return null
+            }
+            val title = label?.trim().orEmpty()
+            return E444MenuLink(title.ifEmpty { address }, address)
         }
 
         @Throws(IOException::class, ParseException::class)

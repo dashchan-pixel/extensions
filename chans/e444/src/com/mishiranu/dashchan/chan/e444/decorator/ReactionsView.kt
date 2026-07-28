@@ -131,7 +131,7 @@ internal class ReactionsView(
             root.background =
                 GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
-                    cornerRadius = dp(density, CORNER_RADIUS_DP).toFloat()
+                    cornerRadius = theme.cornerRadius
                     setColor(theme.cardBackgroundColor)
                     if (selected) {
                         setStroke(dp(density, SELECTED_STROKE_DP), theme.accentColor)
@@ -195,7 +195,6 @@ internal class ReactionsView(
 
     companion object {
         private const val CHIP_GAP_DP = 3
-        private const val CORNER_RADIUS_DP = 4
         private const val SELECTED_STROKE_DP = 1
         private const val COUNT_TEXT_SP = 12f
 

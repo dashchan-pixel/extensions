@@ -143,6 +143,7 @@ internal object E444ModelMapper {
                 "answers" -> raw.pollAnswers = readStringArray(reader)
                 "poll_results_exact" -> raw.pollVotes = readIntArray(reader)
                 "reactions" -> raw.reactions = readReactions(reader)
+                "menu" -> raw.menu = E444PostExtra.readMenu(reader)
                 else -> reader.skip()
             }
         }
@@ -267,6 +268,7 @@ internal object E444ModelMapper {
         var pollAnswers: List<String> = emptyList()
         var pollVotes: List<Int> = emptyList()
         var reactions: List<E444Reaction> = emptyList()
+        var menu: List<E444MenuSection> = emptyList()
 
         fun toPost(): Post {
             val post =
@@ -299,8 +301,8 @@ internal object E444ModelMapper {
         }
 
         /**
-         * Packs the poll and reactions into the post's opaque payload, so the decorator gets them
-         * back at display time without a side channel. Answers arrive as HTML.
+         * Packs the poll, the reactions and the menu into the post's opaque payload, so the
+         * decorator gets them back at display time without a side channel. Answers arrive as HTML.
          */
         private fun encodeExtra(): String? {
             // A poll whose counts do not line up with its answers is dropped rather than shown
@@ -311,6 +313,7 @@ internal object E444ModelMapper {
                     if (hasPoll) pollAnswers.map { StringUtils.clearHtml(it).trim() } else emptyList(),
                     if (hasPoll) pollVotes else emptyList(),
                     reactions,
+                    menu,
                 )
             if (extra.isEmpty) {
                 return null

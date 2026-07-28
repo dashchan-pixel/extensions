@@ -11,13 +11,15 @@ import chan.http.HttpException
 import chan.http.HttpRequest
 import chan.text.JsonSerial
 import chan.text.ParseException
+import com.mishiranu.dashchan.chan.e444.decorator.MenuView
 import com.mishiranu.dashchan.chan.e444.decorator.PollView
 import com.mishiranu.dashchan.chan.e444.decorator.ReactionsView
 import java.io.IOException
 
 /**
- * Draws the two things `ech` puts on a post that the common post model has no room for: its poll and
- * its reactions. Both arrive as the post's opaque payload, written by [E444ModelMapper].
+ * Draws the three things `ech` puts on a post that the common post model has no room for: its menu,
+ * its poll and its reactions. All of them arrive as the post's opaque payload, written by
+ * [E444ModelMapper].
  *
  * This replaces an `enhance/` layer of 18 files that drove the client's UI by reflection -- into
  * `View.mListenerInfo`, `WindowManagerGlobal.mViews`, `DialogMenu$Adapter`, `ConfigurationSet
@@ -30,8 +32,18 @@ class E444ChanPostDecorator : ChanPostDecorator() {
     override fun onCreatePostView(data: ChanPostDecorator.CreatePostViewData): View? {
         val container = LinearLayout(data.context)
         container.orientation = LinearLayout.VERTICAL
+        val menuView = MenuView(data.context)
         val pollView = PollView(data.context)
         val reactionsView = ReactionsView(data.context)
+        // The menu comes first: on the board's own pages it is appended to the comment, while the
+        // poll and the reactions are the post's own furniture below it.
+        container.addView(
+            menuView,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ),
+        )
         container.addView(
             pollView,
             LinearLayout.LayoutParams(
@@ -46,7 +58,7 @@ class E444ChanPostDecorator : ChanPostDecorator() {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
             ),
         )
-        container.tag = Holder(pollView, reactionsView)
+        container.tag = Holder(menuView, pollView, reactionsView)
         return container
     }
 
@@ -58,6 +70,14 @@ class E444ChanPostDecorator : ChanPostDecorator() {
         }
         val configuration = ChanConfiguration.get<E444ChanConfiguration>(this)
         val stateKey = stateKey(data.boardName, data.postNumber)
+        if (extra.menu.isNotEmpty()) {
+            holder.menuView.visibility = View.VISIBLE
+            holder.menuView.bind(extra.menu, data.theme) { url ->
+                data.postContext.navigate(menuLinkUri(url))
+            }
+        } else {
+            holder.menuView.visibility = View.GONE
+        }
         if (extra.pollAnswers.isNotEmpty()) {
             holder.pollView.visibility = View.VISIBLE
             holder.pollView.bind(
@@ -215,8 +235,33 @@ class E444ChanPostDecorator : ChanPostDecorator() {
 
     private fun iconUri(icon: String): Uri = ChanLocator.get<E444ChanLocator>(this).buildPath("static", "img", "reactions", icon)
 
-    /** Groups the two views a decorated post owns, so bind does not have to search for them. */
+    /**
+     * Where a menu button leads.
+     *
+     * The board stores the address exactly as the poster wrote it, so a menu holds anything from
+     * `/b/res/1234.html` through `/pol/` to a link off the board entirely. A relative one is
+     * resolved against the chan's host, the way the client resolves a relative address in a comment
+     * link, which is what turns the common case into a thread the app can open itself.
+     */
+    private fun menuLinkUri(url: String): Uri {
+        val uri = Uri.parse(url)
+        if (!uri.isRelative) {
+            return uri
+        }
+        val path = uri.encodedPath.orEmpty()
+        return ChanLocator
+            .get<E444ChanLocator>(this)
+            .buildPath()
+            .buildUpon()
+            .encodedPath(if (path.startsWith("/")) path else "/$path")
+            .encodedQuery(uri.encodedQuery)
+            .encodedFragment(uri.encodedFragment)
+            .build()
+    }
+
+    /** Groups the three views a decorated post owns, so bind does not have to search for them. */
     private class Holder(
+        val menuView: MenuView,
         val pollView: PollView,
         val reactionsView: ReactionsView,
     )
