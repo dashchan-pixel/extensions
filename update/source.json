@@ -30,6 +30,11 @@
             "archive": "DashchanE444"
         },
         {
+            "name": "karachan",
+            "title": "karachan.org",
+            "archive": "DashchanKarachan"
+        },
+        {
             "name": "arhivach",
             "title": "arhivach",
             "archive": "DashchanArhivach"
