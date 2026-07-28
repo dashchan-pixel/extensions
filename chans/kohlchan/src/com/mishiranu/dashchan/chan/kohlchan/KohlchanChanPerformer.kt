@@ -6,6 +6,7 @@ import chan.content.ApiException
 import chan.content.ChanLocator
 import chan.content.InvalidResponseException
 import chan.content.LynxchanChanPerformer
+import chan.content.LynxchanModelMapper
 import chan.http.HttpException
 import chan.http.HttpRequest
 import chan.http.MultipartEntity
@@ -17,13 +18,18 @@ import org.json.JSONObject
 /**
  * Kohlchan runs a LynxChan fork that predates the JSON `.api/<action>` handlers, so posting goes
  * through the form-encoded `<action>.js?json=1` handlers instead: `newThread` / `replyThread` for
- * posting and `contentActions` for both deletion and reporting. Reading is entirely the engine's.
+ * posting and `contentActions` for both deletion and reporting. Reading is the engine's, save for
+ * the comment quirk [KohlchanModelMapper] fixes up.
  *
  * The captcha id travels in the `captchaid` cookie rather than in the request body, and is sent
  * explicitly rather than left to the cookie jar so a solved captcha cannot be lost between the
  * read and the post.
  */
 class KohlchanChanPerformer : LynxchanChanPerformer() {
+    override val mapper: LynxchanModelMapper by lazy {
+        KohlchanModelMapper(ChanLocator.get<KohlchanChanLocator>(this))
+    }
+
     @Throws(HttpException::class, ApiException::class, InvalidResponseException::class)
     override fun onSendPost(data: SendPostData): SendPostResult {
         val entity = MultipartEntity()

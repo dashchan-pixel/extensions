@@ -1,0 +1,1 @@
+* Line breaks inside posts are no longer collapsed into a single paragraph
