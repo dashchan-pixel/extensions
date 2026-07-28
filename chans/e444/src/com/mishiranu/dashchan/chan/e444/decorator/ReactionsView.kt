@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.util.TypedValue
+import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -139,6 +140,59 @@ internal class ReactionsView(
         }
     }
 
+    /**
+     * The picker's grid. Cells are [PICKER_CELL_SIZE_DP] where the row has the room for them, and
+     * otherwise give up their padding, down to none, to keep [PICKER_MIN_COLUMNS] of them on a row:
+     * a picker that breaks after the seventh icon wastes most of a row and reads as an accident.
+     *
+     * The width to divide up is not something the extension can work out ahead of time -- it is the
+     * dialog's, which depends on the screen, on the 16dp its background insets itself by, and on the
+     * display size the user picked -- so the fit is measured here rather than encoded as dp values
+     * that happen to come out right on one phone. Only the padding shrinks while it can, so the
+     * icons stay the size of a menu entry's check box and the whole cell stays the tap target.
+     */
+    private class PickerLayout(
+        context: Context,
+    ) : FlowLayout(context) {
+        private val density = context.resources.displayMetrics.density
+        private val iconSize = dp(density, PICKER_ICON_SIZE_DP)
+        private val preferredCellSize = dp(density, PICKER_CELL_SIZE_DP)
+        private var appliedCellSize = 0
+
+        override fun onMeasure(
+            widthMeasureSpec: Int,
+            heightMeasureSpec: Int,
+        ) {
+            applyCellSize(cellSizeFor(widthMeasureSpec))
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        }
+
+        private fun cellSizeFor(widthMeasureSpec: Int): Int {
+            val available = MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
+            if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED || available <= 0) {
+                return preferredCellSize
+            }
+            val gaps = (PICKER_MIN_COLUMNS - 1) * horizontalSpacing
+            // Floored at the icon size: a screen too narrow for eight of those is better served by
+            // seven icons a row than by eight the icon cannot be told apart in.
+            return ((available - gaps) / PICKER_MIN_COLUMNS).coerceIn(iconSize, preferredCellSize)
+        }
+
+        private fun applyCellSize(cellSize: Int) {
+            if (cellSize == appliedCellSize) {
+                return
+            }
+            appliedCellSize = cellSize
+            val padding = (cellSize - iconSize) / 2
+            for (index in 0 until childCount) {
+                val child = getChildAt(index)
+                child.layoutParams.width = cellSize
+                child.layoutParams.height = cellSize
+                child.setPadding(padding, padding, padding, padding)
+            }
+        }
+    }
+
     companion object {
         private const val CHIP_GAP_DP = 3
         private const val CORNER_RADIUS_DP = 4
@@ -154,10 +208,26 @@ internal class ReactionsView(
         private const val PICKER_ICON_SIZE_DP = 24
 
         /**
-         * Padding around each picker icon, which is what makes the cell a comfortable tap target
-         * without letting the icon itself grow past a check box.
+         * How wide a picker cell would like to be: the icon plus 8dp of padding on either side,
+         * which is what makes it a comfortable tap target. [PickerLayout] hands that padding back
+         * when a row would otherwise not hold [PICKER_MIN_COLUMNS] icons.
          */
-        private const val PICKER_ICON_PADDING_DP = 8
+        private const val PICKER_CELL_SIZE_DP = PICKER_ICON_SIZE_DP + 2 * 8
+
+        private const val PICKER_GAP_DP = 4
+
+        /**
+         * How many icons a row is expected to hold before the cells are allowed to keep their full
+         * [PICKER_CELL_SIZE_DP]. Eight fits the boards' icon sets into a couple of rows on a phone.
+         */
+        private const val PICKER_MIN_COLUMNS = 8
+
+        /**
+         * Used when the theme has no [android.R.attr.listPreferredItemPaddingStart], which no
+         * Material-derived theme is missing. Matches `dialog_padding_material`, the value every
+         * dialog theme resolves that attribute to.
+         */
+        private const val PICKER_FALLBACK_SIDE_PADDING_DP = 24
 
         private const val PICKER_MAX_HEIGHT_FRACTION = 0.4f
 
@@ -165,6 +235,41 @@ internal class ReactionsView(
             density: Float,
             value: Int,
         ): Int = (density * value).roundToInt()
+
+        /**
+         * The gap the context menu's own rows leave between their text and the dialog's edge, so
+         * that the picker can line its icons up with the entry titles above them.
+         *
+         * A row is `select_dialog_item`, which pads itself by
+         * [android.R.attr.listPreferredItemPaddingStart], and every Material dialog theme points
+         * that attribute at `dialogPreferredPadding` -- 24dp, where a list row's own value is 16dp.
+         * The decorator is handed the activity's context rather than the dialog's, so the alert
+         * dialog theme has to be resolved first, the way `AlertDialog.Builder` resolves it, or the
+         * attribute read back is the list row's.
+         */
+        private fun menuEntryTextPadding(
+            context: Context,
+            density: Float,
+        ): Int {
+            val themeArray = context.obtainStyledAttributes(intArrayOf(android.R.attr.alertDialogTheme))
+            val themeResId =
+                try {
+                    themeArray.getResourceId(0, 0)
+                } finally {
+                    themeArray.recycle()
+                }
+            val dialogContext =
+                if (themeResId != 0) ContextThemeWrapper(context, themeResId) else context
+            val paddingArray =
+                dialogContext.obtainStyledAttributes(
+                    intArrayOf(android.R.attr.listPreferredItemPaddingStart),
+                )
+            return try {
+                paddingArray.getDimensionPixelSize(0, dp(density, PICKER_FALLBACK_SIDE_PADDING_DP))
+            } finally {
+                paddingArray.recycle()
+            }
+        }
 
         /**
          * Builds the picker shown under the post context menu: every icon the board allows, sized to
@@ -178,28 +283,22 @@ internal class ReactionsView(
             onReact: (String) -> Unit,
         ): View {
             val density = context.resources.displayMetrics.density
-            val picker = FlowLayout(context)
-            picker.horizontalSpacing = dp(density, 4)
-            picker.verticalSpacing = dp(density, 4)
-            picker.setPadding(
-                dp(density, 16),
-                dp(density, 8),
-                dp(density, 16),
-                dp(density, 16),
-            )
-            val padding = dp(density, PICKER_ICON_PADDING_DP)
-            val cellSize = dp(density, PICKER_ICON_SIZE_DP) + 2 * padding
+            val picker = PickerLayout(context)
+            picker.horizontalSpacing = dp(density, PICKER_GAP_DP)
+            picker.verticalSpacing = dp(density, PICKER_GAP_DP)
+            val sidePadding = menuEntryTextPadding(context, density)
+            picker.setPadding(sidePadding, dp(density, 8), sidePadding, dp(density, 16))
             for (icon in icons) {
                 val iconView = ImageView(context)
                 // Every cell is the same fixed size and the drawable is fitted inside it, so icons
-                // that differ in intrinsic size still come out uniform.
+                // that differ in intrinsic size still come out uniform. The size and the padding
+                // that centres the icon in it are PickerLayout's to set, once it knows the width.
                 iconView.scaleType = ImageView.ScaleType.FIT_CENTER
                 iconView.adjustViewBounds = false
-                iconView.setPadding(padding, padding, padding, padding)
                 iconView.isClickable = true
                 iconView.isFocusable = true
                 iconView.setOnClickListener { onReact(icon) }
-                picker.addView(iconView, cellSize, cellSize)
+                picker.addView(iconView)
                 postContext.loadImage(iconUri(icon), iconView)
             }
             // A board may allow far more icons than fit above the menu, so the picker scrolls and
