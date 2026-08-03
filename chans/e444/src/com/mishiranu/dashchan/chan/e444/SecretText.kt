@@ -8,7 +8,7 @@ import java.util.regex.Pattern
 /**
  * The board's "private text" ([secret] tag): parts of a comment that only chosen recipients can
  * read. The server delivers them already rendered as
- * `<span class="secret-text" data-encrypted="…" data-keys="…">[приватный текст]</span>`, and the
+ * `<span class="secret-text" data-encrypted="…" data-keys="…">[placeholder]</span>`, and the
  * site's board.js decrypts them in the browser from the reader's `usercode_auth` cookie. This is a
  * faithful port of that `decryptSecretText()` / `.secret-text` click handler, so the app can reveal
  * messages addressed to the logged-in user inline instead of showing an opaque placeholder.
@@ -41,15 +41,24 @@ internal object SecretText {
     private val NON_BASE64: Regex = Regex("[^A-Za-z0-9+/=]")
 
     /**
-     * Replaces every private-text span the reader can open with its plaintext, leaving the rest as
-     * the board's placeholder. Returns [comment] unchanged when there is nothing to do, so the
-     * common no-secrets path costs one `contains` check.
+     * Kept on both revealed and locked private text: E444ChanMarkup maps `span.secret-text` to
+     * TAG_CAPCODE, so the app draws it in the theme's capcode colour. The board's own data-* markup
+     * is dropped — it is only needed to decrypt, which has already happened here.
+     */
+    private const val MARK_OPEN = "<span class=\"secret-text\">"
+    private const val MARK_CLOSE = "</span>"
+
+    /**
+     * Marks every private-text span so it stands out in the capcode colour: the decrypted text when
+     * a `data-keys` slot opens with the reader's [usercode], the board's placeholder otherwise
+     * (including when there is no usercode at all, so private posts are still flagged). Returns
+     * [comment] unchanged when it holds no private text, so the common path costs one `contains`.
      */
     fun reveal(
         comment: String?,
         usercode: String?,
     ): String? {
-        if (comment == null || usercode.isNullOrEmpty() || !comment.contains("secret-text")) {
+        if (comment == null || !comment.contains("secret-text")) {
             return comment
         }
         val matcher = SPAN.matcher(comment)
@@ -58,10 +67,10 @@ internal object SecretText {
         }
         val result = StringBuffer(comment.length)
         do {
-            val revealed = revealSpan(matcher.group(), usercode)
-            // Keep the board's own placeholder (group 1) when the message is not for this reader.
-            val replacement = revealed ?: matcher.group(1).orEmpty()
-            matcher.appendReplacement(result, Matcher.quoteReplacement(replacement))
+            val revealed = if (usercode.isNullOrEmpty()) null else revealSpan(matcher.group(), usercode)
+            // Decrypted text for a recipient, the board's placeholder (group 1) otherwise.
+            val content = revealed ?: matcher.group(1).orEmpty()
+            matcher.appendReplacement(result, Matcher.quoteReplacement(MARK_OPEN + content + MARK_CLOSE))
         } while (matcher.find())
         matcher.appendTail(result)
         return result.toString()

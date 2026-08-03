@@ -19,7 +19,8 @@ class E444ChanMarkup : ChanMarkup() {
             TAG_SUBSCRIPT or
             TAG_SUPERSCRIPT or
             TAG_SPOILER or
-            TAG_CODE
+            TAG_CODE or
+            TAG_SECRET
 
     init {
         addTag("b", TAG_BOLD)
@@ -33,9 +34,16 @@ class E444ChanMarkup : ChanMarkup() {
         addTag("span", "s", TAG_STRIKE)
         addTag("span", "u", TAG_UNDERLINE)
         addTag("span", "o", TAG_OVERLINE)
+        // Private text: SecretText leaves this class on revealed and locked spans alike, and the
+        // app draws it in the theme's capcode colour.
+        addTag("span", "secret-text", TAG_SECRET)
     }
 
-    override fun obtainCommentEditor(boardName: String?): CommentEditor = CommentEditor.BulletinBoardCodeCommentEditor()
+    /** Adds the board's `[secret]` markup so the posting form shows a private-text button for it. */
+    override fun obtainCommentEditor(boardName: String?): CommentEditor =
+        CommentEditor.BulletinBoardCodeCommentEditor().apply {
+            addTag(TAG_SECRET, "[secret]", "[/secret]")
+        }
 
     override fun isTagSupported(
         boardName: String?,

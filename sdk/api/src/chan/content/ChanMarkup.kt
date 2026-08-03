@@ -107,6 +107,12 @@ abstract class ChanMarkup {
          */
         @JvmField
         val TAG_AI: Int = BuildConfig.Private.expr()
+
+        /**
+         * Private/secret text, rendered in the theme's capcode colour (resolved per light/dark theme).
+         */
+        @JvmField
+        val TAG_SECRET: Int = BuildConfig.Private.expr()
     }
 
     /**
