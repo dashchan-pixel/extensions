@@ -78,10 +78,15 @@ internal class E444RequestPerformer private constructor(
     /**
      * For the handful of small, flat replies (posting, deleting, reporting, captcha) where a
      * whole-document object is easier to read than a pull parser.
+     *
+     * [onResponse] runs before the body is read, so callers can inspect response headers (the
+     * board rotates auth cookies on these actions) without having to reach past this helper to the
+     * raw [HttpResponse].
      */
     @Throws(HttpException::class, InvalidResponseException::class)
-    fun performJsonObject(): JSONObject {
+    fun performJsonObject(onResponse: ((HttpResponse) -> Unit)? = null): JSONObject {
         val response = perform()
+        onResponse?.invoke(response)
         return try {
             JSONObject(response.readString())
         } catch (e: JSONException) {

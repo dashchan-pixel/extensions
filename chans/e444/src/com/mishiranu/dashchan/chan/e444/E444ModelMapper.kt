@@ -104,6 +104,7 @@ internal object E444ModelMapper {
     fun readThread(
         reader: JsonSerial.Reader,
         locator: E444ChanLocator,
+        usercode: String?,
     ): Posts {
         val posts = ArrayList<Post>()
         var postsCount = 0
@@ -111,7 +112,7 @@ internal object E444ModelMapper {
         reader.startObject()
         while (!reader.endStruct()) {
             when (reader.nextName()) {
-                "posts" -> readPosts(reader, locator, posts)
+                "posts" -> readPosts(reader, locator, posts, usercode)
                 "posts_count" -> postsCount = reader.nextInt()
                 "files_count" -> postsWithFilesCount = reader.nextInt()
                 else -> reader.skip()
@@ -124,10 +125,11 @@ internal object E444ModelMapper {
         reader: JsonSerial.Reader,
         locator: E444ChanLocator,
         posts: MutableList<Post>,
+        usercode: String?,
     ) {
         reader.startArray()
         while (!reader.endStruct()) {
-            posts.add(readPost(reader, locator))
+            posts.add(readPost(reader, locator, usercode))
         }
     }
 
@@ -139,13 +141,15 @@ internal object E444ModelMapper {
         reader: JsonSerial.Reader,
         locator: E444ChanLocator,
         posts: MutableList<Post>,
+        usercode: String? = null,
     ) {
-        posts.add(readPost(reader, locator))
+        posts.add(readPost(reader, locator, usercode))
     }
 
     private fun readPost(
         reader: JsonSerial.Reader,
         locator: E444ChanLocator,
+        usercode: String?,
     ): Post {
         val raw = RawPost()
         reader.startObject()
@@ -171,7 +175,7 @@ internal object E444ModelMapper {
                 else -> reader.skip()
             }
         }
-        return raw.toPost()
+        return raw.toPost(usercode)
     }
 
     private fun readFiles(
@@ -294,7 +298,7 @@ internal object E444ModelMapper {
         var reactions: List<E444Reaction> = emptyList()
         var menu: List<E444MenuSection> = emptyList()
 
-        fun toPost(): Post {
+        fun toPost(usercode: String?): Post {
             val post =
                 Post()
                     .setThreadNumber((if (parent > 0) parent else num).toString())
@@ -305,7 +309,7 @@ internal object E444ModelMapper {
                     .setCyclical(cyclical)
                     .setTimestamp(timestamp * MILLIS_PER_SECOND)
                     .setSubject(StringUtils.clearHtml(subject).trim())
-                    .setComment(comment)
+                    .setComment(SecretText.reveal(comment, usercode))
                     .setName(StringUtils.clearHtml(name).trim())
                     .setTripcode(tripcode)
             if (parent > 0) {

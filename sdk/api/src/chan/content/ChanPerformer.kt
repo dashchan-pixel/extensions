@@ -1512,4 +1512,26 @@ open class ChanPerformer {
         BuildConfig.Private.error<HttpException>()
         return BuildConfig.Private.expr(selected, images, descriptionText, descriptionImage)
     }
+
+    /**
+     * Suspends this thread and shows a slide-puzzle captcha dialog. The user drags [slider] across
+     * [background] to the gap.
+     *
+     * @param background Background image with a gap cut out of it.
+     * @param slider The puzzle piece to place, drawn at vertical offset [sliderY].
+     * @param sliderY Fixed vertical position of the piece, in [background] pixels.
+     * @param descriptionText Description text (e.g. "Drag the piece into the gap").
+     * @return The piece's chosen left offset in [background] pixels, or `null` if user has canceled.
+     * @throws HttpException if HTTP or another error with message occurred.
+     */
+    @Throws(HttpException::class)
+    protected fun requireUserImageSlider(
+        background: Bitmap,
+        slider: Bitmap,
+        sliderY: Int,
+        descriptionText: String?
+    ): Int? {
+        BuildConfig.Private.error<HttpException>()
+        return BuildConfig.Private.expr(background, slider, sliderY, descriptionText)
+    }
 }
