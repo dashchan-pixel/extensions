@@ -55,7 +55,7 @@ internal object ProjectConfiguration {
 		project.extensions.configure(DetektExtension::class.java) {
 			buildUponDefaultConfig = true
 			allRules = false
-			config.setFrom(project.rootProject.files("detekt.yml"))
+			config.setFrom(resolveSharedConfig(project, "detekt.yml"))
 			source.setFrom(project.files("src"))
 			baseline = project.file("detekt-baseline.xml")
 			ignoreFailures = false
@@ -80,7 +80,7 @@ internal object ProjectConfiguration {
 			description = "Reports '!!' usages without failing the build."
 			group = "verification"
 			setSource(project.files("src"))
-			config.setFrom(project.rootProject.files("detekt-doublebang.yml"))
+			config.setFrom(resolveSharedConfig(project, "detekt-doublebang.yml"))
 			buildUponDefaultConfig = false
 			ignoreFailures = true
 			parallel = true
@@ -114,6 +114,21 @@ internal object ProjectConfiguration {
 				}
 			}
 		}
+	}
+
+	// The SDK is a separate included build with its own rootProject, so rootProject.files(name)
+	// there points at a nonexistent sdk/<name>. Walk up from the module to the one config at the
+	// repository root, which resolves the same file for both the SDK build and the main build.
+	private fun resolveSharedConfig(project: Project, name: String): File {
+		var directory: File? = project.projectDir
+		while (directory != null) {
+			val candidate = File(directory, name)
+			if (candidate.exists()) {
+				return candidate
+			}
+			directory = directory.parentFile
+		}
+		return project.rootProject.file(name)
 	}
 
 	fun manifestFile(project: Project): File =

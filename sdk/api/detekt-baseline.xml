@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CanBeNonNullable:Board.kt$Board$/** * Returns description of this board. * * @return Board description. */ @get:JvmName("getDescription") val description: String? get() = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.ReadCaptchaData$/** * Board name argument. */ @JvmField val boardName: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.ReadCaptchaData$/** * Captcha pass authorization data argument. */ @JvmField val captchaPass: Array&lt;String&gt;? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.ReadCaptchaData$/** * Captcha type argument. */ @JvmField val captchaType: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.ReadCaptchaData$/** * Requirement string argument. * Used with [requireUserCaptcha]. */ @JvmField val requirement: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.ReadCaptchaData$/** * Thread number argument. */ @JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.ReadPostsData$/** * Last existing post number argument. Used when partial thread loading enabled. * * Null when the thread has no cached posts yet, i.e. on its first open. Matches the client's * own declaration; a non-null type here silently defeats the null checks in extensions. */ @JvmField val lastPostNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.ReadSinglePostData$/** * Thread the post belongs to, when the link the post was reached through named it. Always * set on the only path that reaches [onReadSinglePost] today, because the client requires * a thread URI to offer the post card at all. Prefer this over resolving the thread from * the post number when the engine can serve a post out of its thread. */ @JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendAddToArchiveData$/** Archiving thread number argument. */ @JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendAddToArchiveData$/** List of archiving options argument. */ @JvmField val options: List&lt;String&gt;? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendDeletePostsData$/** Password for deleting argument. */ @JvmField val password: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendDeletePostsData$/** Thread number argument. */ @JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** * Captcha data argument. Obtained from [onReadCaptcha]. * May be `null` if captcha was not loaded. */ @JvmField val captchaData: CaptchaData? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** Array of attachments argument. Equals `null` if empty. */ @JvmField val attachments: Array&lt;Attachment&gt;? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** Captcha type argument. */ @JvmField val captchaType: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** Comment argument. Equals `null` if empty. */ @JvmField val comment: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** Email argument. Equals `null` if empty. */ @JvmField val email: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** Name argument. Equals `null` if empty. */ @JvmField val name: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** Password for deleting argument. Equals `null` if empty. */ @JvmField val password: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** Subject argument. Equals `null` if empty. */ @JvmField val subject: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** Thread number argument. Equals `null` if this new thread request. */ @JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendPostData$/** User icon value. Equals `null` if nothing chosen. */ @JvmField val userIcon: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendReportPostsData$/** Comment argument. */ @JvmField val comment: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendReportPostsData$/** List of reporting options argument. */ @JvmField val options: List&lt;String&gt;? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendReportPostsData$/** Reporting type argument. */ @JvmField val type: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendReportPostsData$/** Thread number argument. */ @JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPerformer.kt$ChanPerformer.SendVotePostData$/** Thread number argument. */ @JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.BindPostViewData$/** * Payload stored by [chan.content.model.Post.setExtra], or `null`. */ @JvmField val extra: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.BindPostViewData$@JvmField val boardName: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.BindPostViewData$@JvmField val originalPostNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.BindPostViewData$@JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.CreatePostMenuData$/** * Payload stored by [chan.content.model.Post.setExtra], or `null`. */ @JvmField val extra: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.CreatePostMenuData$@JvmField val boardName: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.CreatePostMenuData$@JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.PerformActionData$/** * Payload stored by [chan.content.model.Post.setExtra], or `null`. */ @JvmField val extra: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.PerformActionData$/** * The payload passed to [PostContext.performAction], or `null`. */ @JvmField val actionExtra: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.PerformActionData$@JvmField val boardName: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.PerformActionData$@JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.PostLinkClickData$/** * Payload stored by [chan.content.model.Post.setExtra], or `null`. */ @JvmField val extra: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.PostLinkClickData$@JvmField val boardName: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.PostLinkClickData$@JvmField val threadNumber: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ChanPostDecorator.kt$ChanPostDecorator.UnbindPostViewData$@JvmField val boardName: String? = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:DataFile.kt$DataFile$/** * Returns a list of file names in the directory. * * @return List of children [DataFile]. */ @get:JvmName("getChildren") val children: List&lt;DataFile&gt;? get() = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:EmbeddedAttachment.kt$EmbeddedAttachment$/** * Returns attachment file URI. * * @return Attachment file URI. */ @get:JvmName("getFileUri") val fileUri: Uri? get() = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:EmbeddedAttachment.kt$EmbeddedAttachment$/** * Returns attachment thumbnail URI. * * @return Attachment thumbnail URI. */ @get:JvmName("getThumbnailUri") val thumbnailUri: Uri? get() = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:EmbeddedAttachment.kt$EmbeddedAttachment$/** * Returns forced file name. * * @return Forced file name. */ @get:JvmName("getForcedName") val forcedName: String? get() = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:GroupParser.kt$GroupParser.Companion$source: String?</ID>
+    <ID>CanBeNonNullable:HttpException.kt$HttpException$/** * HTTP response text (`OK`, `Not Found`, etc.). */ @get:JvmName("getResponseText") val responseText: String? get() = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:Posts.kt$Posts$/** * Returns archived thread URI. * * @return URI of archived thread. */ @get:JvmName("getArchivedThreadUri") val archivedThreadUri: Uri? get() = BuildConfig.Private.expr()</ID>
+    <ID>CanBeNonNullable:ThreadSummary.kt$ThreadSummary$/** * Returns thread short description. * * @return Thread description. */ @get:JvmName("getDescription") val description: String? get() = BuildConfig.Private.expr()</ID>
+    <ID>FunctionParameterNaming:ChanConfiguration.kt$ChanConfiguration.Companion$`object`: Any?</ID>
+    <ID>FunctionParameterNaming:ChanLocator.kt$ChanLocator.Companion$`object`: Any?</ID>
+    <ID>FunctionParameterNaming:ChanMarkup.kt$ChanMarkup.Companion$`object`: Any?</ID>
+    <ID>FunctionParameterNaming:ChanPerformer.kt$ChanPerformer.CaptchaExtraData$`val`: Any</ID>
+    <ID>FunctionParameterNaming:ChanPerformer.kt$ChanPerformer.Companion$`object`: Any?</ID>
+    <ID>FunctionParameterNaming:ChanPostDecorator.kt$ChanPostDecorator.Companion$`object`: Any?</ID>
+    <ID>MemberNameEqualsClassName:Posts.kt$Posts$/** * Returns array of post models this model holds. * * @return Array of posts. */ @get:JvmName("getPosts") val posts: Array&lt;Post&gt; get() = BuildConfig.Private.expr()</ID>
+    <ID>SwallowedException:GroupParser.kt$GroupParser.Attributes$e: Exception</ID>
+    <ID>UnusedParameter:StringUtils.kt$StringUtils$start: Int</ID>
+    <ID>UseOrEmpty:GroupParser.kt$GroupParser.Attributes$seq?.toString() ?: ""</ID>
+  </CurrentIssues>
+</SmellBaseline>

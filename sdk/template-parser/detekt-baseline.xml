@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CanBeNonNullable:TemplateParser.kt$TemplateParser$source: String?</ID>
+    <ID>ExplicitCollectionElementAccessMethod:TemplateParser.kt$TemplateParser.AttributeMatcher$attributes.get(attribute!!)</ID>
+    <ID>MemberNameEqualsClassName:TemplateParser.kt$TemplateParser.Attributes$private var attributes: GroupParser.Attributes? = null</ID>
+    <ID>SwallowedException:TemplateParser.kt$TemplateParser$e: FinishException</ID>
+    <ID>UseCheckOrError:TemplateParser.kt$TemplateParser$throw IllegalStateException( "OpenCallback and ContentCallback can not be defined " + "with CloseCallback at once" )</ID>
+    <ID>UseCheckOrError:TemplateParser.kt$TemplateParser$throw IllegalStateException("Attributed tag definition is not supported for closing tags")</ID>
+  </CurrentIssues>
+</SmellBaseline>
