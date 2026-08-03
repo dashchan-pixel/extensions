@@ -9,10 +9,10 @@ class KarachanChanConfiguration : ChanConfiguration() {
         request(OPTION_READ_SINGLE_POST)
         setDefaultName(DEFAULT_NAME)
         setBumpLimitMode(BumpLimitMode.AFTER_REPLY)
-        // The site guards posting with an invisible reCAPTCHA: its key is refused by the checkbox
-        // widget but accepted by the invisible one, which is the flow the client implements. The
-        // form itself shows no captcha field because the page's script supplies the token.
-        addCaptchaType(CAPTCHA_TYPE_RECAPTCHA_2_INVISIBLE)
+        // The site guards posting with reCAPTCHA 3: pages load `api.js?render=<key>` and the
+        // posting script mints the token itself, which is why the form shows no captcha field.
+        // A v2 widget produces a token this key's verification refuses.
+        addCaptchaType(CAPTCHA_TYPE_RECAPTCHA_3)
     }
 
     override fun obtainBoardConfiguration(boardName: String?): Board =
@@ -62,6 +62,13 @@ class KarachanChanConfiguration : ChanConfiguration() {
     fun isNamesEnabled(boardName: String?): Boolean = get(boardName, KEY_NAMES_ENABLED, false)
 
     /**
+     * Whether the board checks the captcha at all. Boards that do not are the exception, so a
+     * board nothing has been read from yet is assumed to want one: minting a token the server
+     * ignores costs a delay, while skipping one it wants costs the post.
+     */
+    fun isCaptchaEnabled(boardName: String?): Boolean = get(boardName, KEY_CAPTCHA_ENABLED, true)
+
+    /**
      * The captcha key is read off the pages rather than compiled in, so that rotating it on the
      * site does not stop posting here. The last seen key is remembered site wide.
      */
@@ -87,6 +94,7 @@ class KarachanChanConfiguration : ChanConfiguration() {
         boardData.namesEnabled?.let { set(boardName, KEY_NAMES_ENABLED, it) }
         boardData.catalogEnabled?.let { set(boardName, KEY_CATALOG_ENABLED, it) }
         boardData.maxCommentLength?.let { set(boardName, KEY_MAX_COMMENT_LENGTH, it) }
+        boardData.captchaEnabled?.let { set(boardName, KEY_CAPTCHA_ENABLED, it) }
     }
 
     companion object {
@@ -96,6 +104,7 @@ class KarachanChanConfiguration : ChanConfiguration() {
         const val KEY_NAMES_ENABLED = "names_enabled"
         const val KEY_CAPTCHA_SITE_KEY = "captcha_site_key"
         const val KEY_CATALOG_ENABLED = "catalog_enabled"
+        const val KEY_CAPTCHA_ENABLED = "captcha_enabled"
         const val KEY_MAX_COMMENT_LENGTH = "max_comment_length"
 
         private val ATTACHMENT_MIME_TYPES =

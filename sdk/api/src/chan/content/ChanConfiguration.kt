@@ -193,6 +193,14 @@ open class ChanConfiguration {
         val CAPTCHA_TYPE_HCAPTCHA: String = BuildConfig.Private.expr()
 
         /**
+         * reCAPTCHA 3, which never shows a challenge: it scores the request and hands back a
+         * token bound to the action that minted it. The action belongs to the site rather than to
+         * the key, so it travels per request in [ChanPerformer.CaptchaData.ACTION].
+         */
+        @JvmField
+        val CAPTCHA_TYPE_RECAPTCHA_3: String = BuildConfig.Private.expr()
+
+        /**
          * Return linked [ChanConfiguration] instance.
          *
          * @param object Linked object: [ChanConfiguration], [ChanPerformer],
@@ -876,7 +884,8 @@ open class ChanConfiguration {
      * Client will obtain configuration of custom captchas with [obtainCustomCaptchaConfiguration].
      *
      * Here is the list of default captcha types: [CAPTCHA_TYPE_RECAPTCHA_2],
-     * [CAPTCHA_TYPE_RECAPTCHA_2_INVISIBLE], and [CAPTCHA_TYPE_HCAPTCHA].
+     * [CAPTCHA_TYPE_RECAPTCHA_2_INVISIBLE], [CAPTCHA_TYPE_HCAPTCHA], and
+     * [CAPTCHA_TYPE_RECAPTCHA_3].
      * Client is able to handle these captchas by itself.
      *
      * @param captchaType Captcha type string.

@@ -1120,6 +1120,14 @@ open class ChanPerformer {
              */
             @JvmField
             val REFERER: String = BuildConfig.Private.expr()
+
+            /**
+             * The name reCAPTCHA 3 binds a token to. The site decides it and verifies it back, so
+             * a token minted under the wrong action is refused as firmly as no token at all.
+             * Ignored by every other captcha type.
+             */
+            @JvmField
+            val ACTION: String = BuildConfig.Private.expr()
         }
     }
 

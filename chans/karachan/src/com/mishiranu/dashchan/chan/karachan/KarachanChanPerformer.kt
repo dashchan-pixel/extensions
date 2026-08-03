@@ -204,9 +204,9 @@ class KarachanChanPerformer : ChanPerformer() {
         if (data.optionOriginalPoster) {
             entity.add("OPcb", "1")
         }
-        // The solved token is sent under the name reCAPTCHA integrations conventionally use, and
-        // under the one this engine's own captcha field carries, since the fork's scripts cannot
-        // be read from here and either name costs nothing to send.
+        // `captcha` is the name the site's own posting script sends the token under. The name
+        // reCAPTCHA integrations conventionally use goes with it: the server-side script cannot
+        // be read from here, and a field it does not look at costs nothing.
         data.captchaData?.get(CaptchaData.INPUT)?.let { token ->
             entity.add("g-recaptcha-response", token)
             entity.add("captcha", token)
@@ -304,12 +304,15 @@ class KarachanChanPerformer : ChanPerformer() {
 
     /**
      * Answers the client's captcha request with the key the pages advertise. The challenge itself
-     * is solved by the client, which knows the invisible reCAPTCHA flow.
+     * is solved by the client, which knows the reCAPTCHA 3 flow.
      */
     override fun onReadCaptcha(data: ReadCaptchaData): ReadCaptchaResult {
         val locator = ChanLocator.get(this) as KarachanChanLocator
         val configuration = ChanConfiguration.get(this) as KarachanChanConfiguration
         val refererUri = refererUri(locator, data.boardName, data.threadNumber)
+        if (!configuration.isCaptchaEnabled(data.boardName)) {
+            return ReadCaptchaResult(CaptchaState.SKIP, null)
+        }
         val siteKey =
             configuration.getCaptchaSiteKey()
                 // A posting form opened before any page of the site was read leaves the key
@@ -323,6 +326,9 @@ class KarachanChanPerformer : ChanPerformer() {
         captchaData.put(CaptchaData.API_KEY, siteKey)
         // The challenge is bound to the page the post is written on.
         captchaData.put(CaptchaData.REFERER, refererUri.toString())
+        // The engine verifies the token against the name its own script mints one under, so a
+        // token carrying any other name is refused exactly as an absent one would be.
+        captchaData.put(CaptchaData.ACTION, CAPTCHA_ACTION)
         return ReadCaptchaResult(CaptchaState.CAPTCHA, captchaData)
     }
 
@@ -396,8 +402,15 @@ class KarachanChanPerformer : ChanPerformer() {
     }
 
     companion object {
-        /** The key the pages hand to the captcha script. */
-        private val CAPTCHA_SITE_KEY = Pattern.compile("recaptcha/api\\.js\\?render=([\\w-]+)")
+        /**
+         * The key the pages hand to the captcha script. `render` naming a key is what marks the
+         * script as reCAPTCHA 3; the value a version 2 page puts there is the word `explicit`,
+         * which is not a key and must not be stored as one.
+         */
+        private val CAPTCHA_SITE_KEY = Pattern.compile("recaptcha/api\\.js\\?render=(?!explicit)([\\w-]+)")
+
+        /** The name the posting script mints its token under. */
+        private const val CAPTCHA_ACTION = "add_post"
 
         /** The site's main board, used only to reach the navigation menu. */
         private const val FALLBACK_BOARD_NAME = "b"

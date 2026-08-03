@@ -17,6 +17,7 @@ class KarachanBoardData(
     val namesEnabled: Boolean?,
     val catalogEnabled: Boolean?,
     val maxCommentLength: Int?,
+    val captchaEnabled: Boolean?,
 ) {
     companion object {
         private const val CONFIG_PREFIX = "boarddata"
@@ -53,6 +54,10 @@ class KarachanBoardData(
                 namesEnabled = jsonObject.optIntOrNull("noname")?.let { it == 0 },
                 catalogEnabled = jsonObject.optIntOrNull("catalog")?.let { it != 0 },
                 maxCommentLength = jsonObject.optIntOrNull("maxchars"),
+                // Boards are free to run without a captcha, and the ones that do carry no captcha
+                // script on their pages at all. Solving one for them would cost a delay and a
+                // token for a field the server never reads.
+                captchaEnabled = jsonObject.optIntOrNull("captcha")?.let { it != 0 },
             )
 
         private fun JSONObject.optIntOrNull(name: String): Int? = if (has(name)) optInt(name, 0) else null
