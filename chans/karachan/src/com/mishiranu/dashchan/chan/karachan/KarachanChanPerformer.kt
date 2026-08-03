@@ -168,6 +168,12 @@ class KarachanChanPerformer : ChanPerformer() {
         targets: List<String>,
         responseText: String,
     ): Nothing {
+        // A ban is answered with its own page, in place of the one the post was written on, and
+        // carries everything the client needs to explain it and to keep it. Read before the
+        // wording is looked at, since that page says only "Banned" where a message would be.
+        KarachanBanData.parse(responseText)?.let {
+            throw ApiException(ApiException.SEND_ERROR_BANNED, it)
+        }
         // The spam filter bans instead of answering, and says so only by where it sends the
         // browser afterwards.
         if (targets.any { BANNED_PATH.matcher(it).find() }) {
