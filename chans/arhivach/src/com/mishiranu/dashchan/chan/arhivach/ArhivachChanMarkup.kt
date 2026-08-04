@@ -17,6 +17,7 @@ class ArhivachChanMarkup : ChanMarkup() {
         addTag("span", "spoiler", TAG_SPOILER)
         addTag("span", "s", TAG_STRIKE)
         addTag("span", "u", TAG_UNDERLINE)
+        addTag("div", "neuroslop", TAG_AI)
     }
 
     override fun obtainPostLinkThreadPostNumbers(uriString: String): Pair<String, String>? {

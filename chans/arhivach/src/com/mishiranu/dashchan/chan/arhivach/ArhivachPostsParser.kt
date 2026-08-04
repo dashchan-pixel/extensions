@@ -406,6 +406,9 @@ class ArhivachPostsParser(
                         t = t.substring(0, index)
                     }
                     t = t.replace(" (OP)</a>", "</a>")
+                    if (t.contains("<div class=\"neuroslop\">")) {
+                        holder.post!!.setAIGenerated(true)
+                    }
                     holder.post!!.setComment(t)
                     if (holder.attachments.size > 0) {
                         holder.post!!.setAttachments(ArrayList(holder.attachments))
