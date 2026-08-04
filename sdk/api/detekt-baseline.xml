@@ -60,7 +60,5 @@
     <ID>FunctionParameterNaming:ChanPostDecorator.kt$ChanPostDecorator.Companion$`object`: Any?</ID>
     <ID>MemberNameEqualsClassName:Posts.kt$Posts$/** * Returns array of post models this model holds. * * @return Array of posts. */ @get:JvmName("getPosts") val posts: Array&lt;Post&gt; get() = BuildConfig.Private.expr()</ID>
     <ID>SwallowedException:GroupParser.kt$GroupParser.Attributes$e: Exception</ID>
-    <ID>UnusedParameter:StringUtils.kt$StringUtils$start: Int</ID>
-    <ID>UseOrEmpty:GroupParser.kt$GroupParser.Attributes$seq?.toString() ?: ""</ID>
   </CurrentIssues>
 </SmellBaseline>

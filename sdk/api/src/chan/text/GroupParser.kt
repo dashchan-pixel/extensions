@@ -38,7 +38,7 @@ class GroupParser private constructor() {
                 val field = javaClass.getDeclaredField("html")
                 field.isAccessible = true
                 val seq = field.get(this) as? CharSequence
-                return seq?.toString() ?: ""
+                return seq?.toString().orEmpty()
             } catch (e: Exception) {
                 return ""
             }

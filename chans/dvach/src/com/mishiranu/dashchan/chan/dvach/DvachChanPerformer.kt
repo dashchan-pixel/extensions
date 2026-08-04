@@ -794,7 +794,7 @@ class DvachChanPerformer : ChanPerformer() {
         lastCaptchaPassCookie = captchaPassCookie
         configuration.setMaxFilesCount(PASSCODUBOYAR_MAX_FILES)
         configuration.storeCookie(COOKIE_PASSCODE_AUTH, captchaPassCookie, "Passcode Auth")
-        return captchaPassCookie ?: ""
+        return captchaPassCookie.orEmpty()
     }
 
     @Throws(HttpException::class, InvalidResponseException::class)
@@ -974,7 +974,7 @@ class DvachChanPerformer : ChanPerformer() {
         var subject = data.subject
         var tag: String? = null
         if (data.threadNumber == null && data.subject != null) {
-            val matcher = PATTERN_TAG.matcher(subject ?: "")
+            val matcher = PATTERN_TAG.matcher(subject.orEmpty())
             if (matcher.matches()) {
                 subject = matcher.group(1)
                 tag = matcher.group(2)
@@ -1003,9 +1003,9 @@ class DvachChanPerformer : ChanPerformer() {
         var captchaPassCookie: String? = null
         val captchaData = data.captchaData
         if (captchaData != null) {
-            captchaPassCookie = captchaData.get(CAPTCHA_PASS_COOKIE)
-            val challenge = captchaData.get(CaptchaData.CHALLENGE)
-            val input = StringUtils.emptyIfNull(captchaData.get(CaptchaData.INPUT))
+            captchaPassCookie = captchaData[CAPTCHA_PASS_COOKIE]
+            val challenge = captchaData[CaptchaData.CHALLENGE]
+            val input = StringUtils.emptyIfNull(captchaData[CaptchaData.INPUT])
 
             if (DvachChanConfiguration.CAPTCHA_TYPE_2CH_EMOJI_CAPTCHA != data.captchaType) {
                 DvachChanConfiguration.CAPTCHA_TYPES[data.captchaType]?.let {
@@ -1106,7 +1106,7 @@ class DvachChanPerformer : ChanPerformer() {
         }
         if (errorType == ApiException.SEND_ERROR_BANNED) {
             val banExtra = ApiException.BanExtra()
-            val matcher = PATTERN_BAN.matcher(reason ?: "")
+            val matcher = PATTERN_BAN.matcher(reason.orEmpty())
             if (matcher.find()) {
                 banExtra.setId(StringUtils.emptyIfNull(matcher.group(1)))
                 banExtra.setMessage(StringUtils.emptyIfNull(matcher.group(2)))

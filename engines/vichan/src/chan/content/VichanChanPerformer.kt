@@ -67,11 +67,7 @@ open class VichanChanPerformer : ChanPerformer() {
                     !StringUtils.isEmpty(boardName) &&
                     !StringUtils.isEmpty(title)
                 ) {
-                    var boards = boardsMap[category]
-                    if (boards == null) {
-                        boards = ArrayList()
-                        boardsMap[category] = boards
-                    }
+                    val boards = boardsMap.getOrPut(category) { ArrayList() }
                     boards.add(Board(boardName, title, description))
                 }
             }

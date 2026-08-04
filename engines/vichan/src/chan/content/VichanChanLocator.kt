@@ -72,8 +72,7 @@ open class VichanChanLocator : ChanLocator() {
     }
 
     companion object {
-        @JvmField
-        val DEFAULT_SEGMENT_PRESET: String = ""
+        const val DEFAULT_SEGMENT_PRESET: String = ""
 
         @JvmField
         val BOARD_PATH: Pattern = Pattern.compile("/\\w+(?:/(?:(?:catalog|index|\\d+)\\.html)?)?")

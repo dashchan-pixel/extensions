@@ -26,7 +26,7 @@ import java.util.regex.Pattern
 class ArhivachChanPerformer : ChanPerformer() {
     private var lastSearchQuery: String? = null
     private var lastSearchTags: String? = null
-    private var lastSearchTagsList: ArrayList<String>? = null
+    private var lastSearchTagsList: List<String>? = null
 
     private var userEmailPassword: Pair<String, String>? = null
 
@@ -72,7 +72,7 @@ class ArhivachChanPerformer : ChanPerformer() {
             searchQuery = searchQuery.substring(1)
         }
         var searchTags: String?
-        var searchTagsList: ArrayList<String>?
+        var searchTagsList: List<String>?
         var equals: Boolean
         synchronized(this) {
             equals = searchQuery == lastSearchQuery
@@ -355,7 +355,7 @@ class ArhivachChanPerformer : ChanPerformer() {
 
     @Throws(HttpException::class, ApiException::class, InvalidResponseException::class)
     override fun onSendAddToArchive(data: SendAddToArchiveData): SendAddToArchiveResult {
-        var userEmailPassword = authorizeUserFromConfiguration(data)
+        val userEmailPassword = authorizeUserFromConfiguration(data)
         val locator = ChanLocator.get(this) as ArhivachChanLocator
         var uri = locator.buildPath("api", "add")
         var first = true
@@ -366,8 +366,8 @@ class ArhivachChanPerformer : ChanPerformer() {
                 val captchaData =
                     requireUserCaptcha(null, null, null, !first)
                         ?: throw ApiException(ApiException.ARCHIVE_ERROR_NO_ACCESS)
-                captchaChallenge = captchaData.get(CaptchaData.CHALLENGE)
-                captchaInput = captchaData.get(CaptchaData.INPUT)
+                captchaChallenge = captchaData[CaptchaData.CHALLENGE]
+                captchaInput = captchaData[CaptchaData.INPUT]
                 first = false
             }
             val entity = UrlEncodedEntity()

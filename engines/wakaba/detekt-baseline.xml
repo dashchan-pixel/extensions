@@ -5,6 +5,5 @@
     <ID>DoubleMutabilityForCollection:WakabaPostsParser.kt$WakabaPostsParser$protected open var threads: ArrayList&lt;Posts&gt;? = null</ID>
     <ID>LongMethod:WakabaChanPerformer.kt$WakabaChanPerformer$@Throws(ApiException::class) protected open fun handleError( errorSource: ErrorSource, responseText: String, )</ID>
     <ID>LongMethod:WakabaPostsParser.kt$WakabaPostsParser.Companion$@JvmStatic protected fun &lt;Holder : WakabaPostsParser&lt;*, *, Holder&gt;&gt; createParserBuilder(): TemplateParser.InitialBuilder&lt;Holder&gt;</ID>
-    <ID>UseIsNullOrEmpty:WakabaChanPerformer.kt$WakabaChanPerformer$posts == null || posts.isEmpty()</ID>
   </CurrentIssues>
 </SmellBaseline>

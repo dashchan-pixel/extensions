@@ -54,7 +54,7 @@ class TemplateParser<H> {
             if (method == null) {
                 return true
             }
-            val value = attributes.get(attribute!!)
+            val value = attributes[attribute!!]
             return when (method) {
                 Method.EQUALS -> CommonUtils.equals(value, this.value)
                 Method.STARTS -> value != null && value.startsWith(this.value!!)
@@ -67,14 +67,14 @@ class TemplateParser<H> {
     private fun copyCallbacks() {
         if (openCallback != null || contentCallback != null || closeCallback != null) {
             if ((openCallback != null || contentCallback != null) && closeCallback != null) {
-                throw IllegalStateException(
+                error(
                     "OpenCallback and ContentCallback can not be defined " +
                             "with CloseCallback at once"
                 )
             }
             for (pair in buildingMatchers) {
                 if (closeCallback != null && pair.second.attribute != null) {
-                    throw IllegalStateException("Attributed tag definition is not supported for closing tags")
+                    error("Attributed tag definition is not supported for closing tags")
                 }
                 val map = if (closeCallback != null) closeMatchers else openMatchers
                 var matchers = map[pair.first]
@@ -240,7 +240,7 @@ class TemplateParser<H> {
      * Attributes holder and parser.
      */
     class Attributes {
-        private var attributes: GroupParser.Attributes? = null
+        private var groupAttributes: GroupParser.Attributes? = null
         private val lastValues = HashMap<String, String>()
 
         /**
@@ -253,14 +253,14 @@ class TemplateParser<H> {
         operator fun get(attribute: String): String? {
             var value = lastValues[attribute]
             if (value == null) {
-                value = attributes!!.get(attribute)
+                value = groupAttributes!!.get(attribute)
                 lastValues[attribute] = value ?: NULL
             }
             return if (value.equals(NULL)) null else value
         }
 
         internal fun set(attributes: GroupParser.Attributes) {
-            this.attributes = attributes
+            this.groupAttributes = attributes
             lastValues.clear()
         }
 

@@ -2,16 +2,10 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>DoubleMutabilityForCollection:ArhivachChanPerformer.kt$ArhivachChanPerformer$private var lastSearchTagsList: ArrayList&lt;String&gt;? = null</ID>
-    <ID>DoubleMutabilityForCollection:ArhivachChanPerformer.kt$ArhivachChanPerformer$var searchTagsList: ArrayList&lt;String&gt;?</ID>
     <ID>DoubleMutabilityForCollection:ArhivachPostsParser.kt$ArhivachPostsParser.Companion$var icons: ArrayList&lt;Icon&gt;? = null</ID>
-    <ID>ExplicitCollectionElementAccessMethod:ArhivachChanPerformer.kt$ArhivachChanPerformer$captchaData.get(CaptchaData.CHALLENGE)</ID>
-    <ID>ExplicitCollectionElementAccessMethod:ArhivachChanPerformer.kt$ArhivachChanPerformer$captchaData.get(CaptchaData.INPUT)</ID>
     <ID>LongMethod:ArhivachChanPerformer.kt$ArhivachChanPerformer$@Throws(HttpException::class, ApiException::class, InvalidResponseException::class) override fun onSendAddToArchive(data: SendAddToArchiveData): SendAddToArchiveResult</ID>
     <ID>LongMethod:ArhivachChanPerformer.kt$ArhivachChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadContent(data: ReadContentData): ReadContentResult</ID>
     <ID>LongMethod:ArhivachChanPerformer.kt$ArhivachChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadSearchPosts(data: ReadSearchPostsData): ReadSearchPostsResult</ID>
     <ID>SwallowedException:ArhivachChanPerformer.kt$ArhivachChanPerformer$e: Exception</ID>
-    <ID>UnusedPrivateProperty:ArhivachPostsParser.kt$ArhivachPostsParser.Companion$private val PATSER_HOLDER = this</ID>
-    <ID>VarCouldBeVal:ArhivachChanPerformer.kt$ArhivachChanPerformer$var userEmailPassword = authorizeUserFromConfiguration(data)</ID>
   </CurrentIssues>
 </SmellBaseline>

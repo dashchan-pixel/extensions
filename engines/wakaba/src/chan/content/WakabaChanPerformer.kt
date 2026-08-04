@@ -64,7 +64,7 @@ abstract class WakabaChanPerformer : ChanPerformer() {
         try {
             response.open().use { input ->
                 val posts = parsePosts(data.boardName, input)
-                if (posts == null || posts.isEmpty()) {
+                if (posts.isNullOrEmpty()) {
                     throw InvalidResponseException()
                 }
                 return posts

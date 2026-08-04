@@ -46,9 +46,9 @@ open class VichanAntispamParser private constructor(
                 }.name("input")
                 .open { instance, holder, tagName, attributes ->
                     if (holder.formParsing) {
-                        val name = attributes.get("name")
+                        val name = attributes["name"]
                         if (!holder.ignoreFields.contains(name)) {
-                            val value = StringUtils.unescapeHtml(attributes.get("value"))
+                            val value = StringUtils.unescapeHtml(attributes["value"])
                             holder.fields.add(Pair(name, value))
                         }
                     }
@@ -56,7 +56,7 @@ open class VichanAntispamParser private constructor(
                 }.name("textarea")
                 .open { instance, holder, tagName, attributes ->
                     if (holder.formParsing) {
-                        val name = attributes.get("name")
+                        val name = attributes["name"]
                         if (!holder.ignoreFields.contains(name)) {
                             holder.fieldName = name
                             return@open true

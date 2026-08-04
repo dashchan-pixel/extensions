@@ -50,7 +50,6 @@ open class VichanChanConfiguration : ChanConfiguration() {
     open fun getDefaultBoardCategory(): String = DEFAULT_BOARD_CATEGORY
 
     companion object {
-        @JvmField
-        val DEFAULT_BOARD_CATEGORY: String = "Boards"
+        const val DEFAULT_BOARD_CATEGORY: String = "Boards"
     }
 }

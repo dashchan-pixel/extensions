@@ -68,7 +68,7 @@ object StringUtils {
      */
     @JvmStatic
     fun nearestIndexOf(string: CharSequence, start: Int, vararg what: Char): Int =
-        BuildConfig.Private.expr(string, string, what)
+        BuildConfig.Private.expr(string, start, what)
 
     /**
      * Replacement callback for `replaceAll` methods.

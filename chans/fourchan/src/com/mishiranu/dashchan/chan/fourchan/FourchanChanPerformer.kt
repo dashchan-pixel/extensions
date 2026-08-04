@@ -297,10 +297,7 @@ class FourchanChanPerformer : ChanPerformer() {
                                     val board = configuration.updateBoard(reader)
                                     if (board != null) {
                                         val category = boardToCategory[board.boardName]
-                                        var boards = boardsMap[category]
-                                        if (boards == null) {
-                                            boards = boardsMap[uncategorized]
-                                        }
+                                        val boards = boardsMap[category] ?: boardsMap[uncategorized]
                                         boards?.add(board)
                                     }
                                 }

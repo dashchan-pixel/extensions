@@ -3,7 +3,6 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>CanBeNonNullable:ThreadsWithTailCache.kt$ThreadsWithTailCache$threadNumber: String?</ID>
-    <ID>DoubleMutabilityForCollection:FourchanChanPerformer.kt$FourchanChanPerformer$var boards = boardsMap[category]</ID>
     <ID>DoubleMutabilityForCollection:FourchanModelMapper.kt$FourchanModelMapper.Extra$var lastReplies: ArrayList&lt;Post&gt;? = null</ID>
     <ID>LongMethod:FourchanChanConfiguration.kt$FourchanChanConfiguration$@Throws(IOException::class, ParseException::class) fun updateBoard(reader: JsonSerial.Reader): chan.content.model.Board?</ID>
     <ID>LongMethod:FourchanChanPerformer.kt$FourchanChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadBoards(data: ReadBoardsData): ReadBoardsResult</ID>

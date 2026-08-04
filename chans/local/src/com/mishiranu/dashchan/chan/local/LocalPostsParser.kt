@@ -63,7 +63,7 @@ class LocalPostsParser(
         attributes: GroupParser.Attributes,
     ): Boolean {
         if (attributes.contains("data-")) {
-            val number = attributes.get("data-number")
+            val number = attributes["data-number"]
             if (number != null) {
                 if (onlyOriginalPost && post != null) {
                     throw OriginalPostParsedException()
@@ -81,47 +81,47 @@ class LocalPostsParser(
                     post!!.setParentPostNumber(parent)
                 }
             }
-            attributes.get("data-name")?.let { post!!.setName(StringUtils.clearHtml(it)) }
-            attributes.get("data-identifier")?.let { post!!.setIdentifier(StringUtils.clearHtml(it)) }
-            attributes.get("data-tripcode")?.let { post!!.setTripcode(StringUtils.clearHtml(it)) }
-            attributes.get("data-capcode")?.let { post!!.setCapcode(StringUtils.clearHtml(it)) }
-            attributes.get("data-default-name")?.let { post!!.setDefaultName(true) }
-            attributes.get("data-email")?.let { post!!.setEmail(StringUtils.clearHtml(it)) }
-            attributes.get("data-timestamp")?.let { post!!.setTimestamp(it.toLong()) }
-            attributes.get("data-sage")?.let { post!!.setSage(true) }
-            attributes.get("data-op")?.let { post!!.setOriginalPoster(true) }
-            attributes.get("data-file")?.let {
+            attributes["data-name"]?.let { post!!.setName(StringUtils.clearHtml(it)) }
+            attributes["data-identifier"]?.let { post!!.setIdentifier(StringUtils.clearHtml(it)) }
+            attributes["data-tripcode"]?.let { post!!.setTripcode(StringUtils.clearHtml(it)) }
+            attributes["data-capcode"]?.let { post!!.setCapcode(StringUtils.clearHtml(it)) }
+            attributes["data-default-name"]?.let { post!!.setDefaultName(true) }
+            attributes["data-email"]?.let { post!!.setEmail(StringUtils.clearHtml(it)) }
+            attributes["data-timestamp"]?.let { post!!.setTimestamp(it.toLong()) }
+            attributes["data-sage"]?.let { post!!.setSage(true) }
+            attributes["data-op"]?.let { post!!.setOriginalPoster(true) }
+            attributes["data-file"]?.let {
                 attachment =
                     FileAttachment().also { attachment ->
                         attachments.add(attachment)
                         attachment.setFileUri(locator, createFileUriLocal(it))
                     }
             }
-            attributes.get("data-thumbnail")?.let {
+            attributes["data-thumbnail"]?.let {
                 attachment!!.setThumbnailUri(locator, createFileUriLocal(it))
             }
-            attributes.get("data-original-name")?.let {
+            attributes["data-original-name"]?.let {
                 attachment!!.setOriginalName(StringUtils.clearHtml(it))
             }
-            attributes.get("data-size")?.let { attachment!!.setSize(it.toInt()) }
-            attributes.get("data-width")?.let { attachment!!.setWidth(it.toInt()) }
-            attributes.get("data-height")?.let { attachment!!.setHeight(it.toInt()) }
-            if (attributes.get("data-icon") != null) {
-                val src = attributes.get("src")
-                val title = StringUtils.clearHtml(attributes.get("title"))
+            attributes["data-size"]?.let { attachment!!.setSize(it.toInt()) }
+            attributes["data-width"]?.let { attachment!!.setWidth(it.toInt()) }
+            attributes["data-height"]?.let { attachment!!.setHeight(it.toInt()) }
+            if (attributes["data-icon"] != null) {
+                val src = attributes["src"]
+                val title = StringUtils.clearHtml(attributes["title"])
                 icons.add(Icon(locator, Uri.parse(src), title))
             }
-            if (attributes.get("data-subject") != null) {
+            if (attributes["data-subject"] != null) {
                 expect = EXPECT_SUBJECT
                 return true
             }
-            if (attributes.get("data-comment") != null) {
+            if (attributes["data-comment"] != null) {
                 expect = EXPECT_COMMENT
                 return true
             }
-            attributes.get("data-thread-uri")?.let { threadUri = Uri.parse(it) }
-            attributes.get("data-posts")?.let { postsCount = it.toInt() }
-            attributes.get("data-files")?.let { filesCount = it.toInt() }
+            attributes["data-thread-uri"]?.let { threadUri = Uri.parse(it) }
+            attributes["data-posts"]?.let { postsCount = it.toInt() }
+            attributes["data-files"]?.let { filesCount = it.toInt() }
         }
         return false
     }

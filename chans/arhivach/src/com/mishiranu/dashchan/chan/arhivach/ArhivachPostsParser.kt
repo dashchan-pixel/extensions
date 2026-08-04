@@ -249,8 +249,6 @@ class ArhivachPostsParser(
             return 0L
         }
 
-        private val PATSER_HOLDER = this
-
         private val PARSER =
             TemplateParser
                 .builder<ArhivachPostsParser>()

@@ -5,9 +5,6 @@
     <ID>CanBeNonNullable:DvachChanConfiguration.kt$DvachChanConfiguration$value: Boolean?</ID>
     <ID>CanBeNonNullable:DvachChanPerformer.kt$DvachChanPerformer$reason: String?</ID>
     <ID>CanBeNonNullable:DvachModelMapper.kt$DvachModelMapper$path: String?</ID>
-    <ID>ExplicitCollectionElementAccessMethod:DvachChanPerformer.kt$DvachChanPerformer$captchaData.get(CAPTCHA_PASS_COOKIE)</ID>
-    <ID>ExplicitCollectionElementAccessMethod:DvachChanPerformer.kt$DvachChanPerformer$captchaData.get(CaptchaData.CHALLENGE)</ID>
-    <ID>ExplicitCollectionElementAccessMethod:DvachChanPerformer.kt$DvachChanPerformer$captchaData.get(CaptchaData.INPUT)</ID>
     <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws( IOException::class, ParseException::class, HttpException::class, InvalidResponseException::class, RedirectException::class, ) private fun parsePostsResponse( reader: JsonSerial.Reader, data: ReadPostsData, usePartialApi: Boolean, archive: Boolean, archiveDate: String?, ): Posts</ID>
     <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws(HttpException::class, ApiException::class, InvalidResponseException::class) override fun onSendPost(data: SendPostData): SendPostResult</ID>
     <ID>LongMethod:DvachChanPerformer.kt$DvachChanPerformer$@Throws(HttpException::class, InvalidResponseException::class) override fun onReadSearchPosts(data: ReadSearchPostsData): ReadSearchPostsResult</ID>
@@ -27,8 +24,5 @@
     <ID>ThrowingExceptionsWithoutMessageOrCause:DvachChanPerformer.kt$DvachChanPerformer$RuntimeException()</ID>
     <ID>TooGenericExceptionThrown:DvachChanPerformer.kt$DvachChanPerformer$throw RuntimeException()</ID>
     <ID>TooGenericExceptionThrown:DvachEmojiCaptchaProvider.kt$DvachEmojiCaptchaProvider$throw RuntimeException(ex.message)</ID>
-    <ID>UseOrEmpty:DvachChanPerformer.kt$DvachChanPerformer$captchaPassCookie ?: ""</ID>
-    <ID>UseOrEmpty:DvachChanPerformer.kt$DvachChanPerformer$reason ?: ""</ID>
-    <ID>UseOrEmpty:DvachChanPerformer.kt$DvachChanPerformer$subject ?: ""</ID>
   </CurrentIssues>
 </SmellBaseline>
