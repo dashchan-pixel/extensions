@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+	<string name="captcha_variant_unsupported">4chan asked for a captcha this extension cannot show. Post from
+		the browser this time.</string>
+	<string name="captcha_wants_hcaptcha">4chan wants an hCaptcha before it hands out a captcha. Post from the
+		browser this time.</string>
 	<string name="preference_math_tags">Handle [math] tags</string>
 	<string name="preference_math_tags_summary">Show image links using quicklatex.com web service</string>
+	<string name="select_the_most_readable_captcha">Select the most readable captcha</string>
+	<plurals name="capthca_cooldown_message__format">
+		<item quantity="one">Retry attempt after %d second</item>
+		<item quantity="many">Retry attempt after %d seconds</item>
+		<item quantity="other">Retry attempt after %d seconds</item>
+	</plurals>
 
 </resources>

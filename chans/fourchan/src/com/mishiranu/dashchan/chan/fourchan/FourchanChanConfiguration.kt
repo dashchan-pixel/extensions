@@ -1,17 +1,25 @@
 package com.mishiranu.dashchan.chan.fourchan
 
+import android.util.Pair
 import chan.content.ChanConfiguration
 import chan.content.ChanMarkup
 import chan.text.JsonSerial
 import chan.text.ParseException
 import chan.util.StringUtils
+import org.json.JSONException
+import org.json.JSONObject
 import java.io.IOException
 
 class FourchanChanConfiguration : ChanConfiguration() {
     init {
         request(OPTION_READ_THREAD_PARTIALLY)
+        request(OPTION_ALLOW_CAPTCHA_PASS)
         setDefaultName("Anonymous")
         setBumpLimit(300)
+        // 4chan retired reCAPTCHA for posting; the only thing it still takes is its own slider.
+        // The reCAPTCHA the performer still knows about is the one guarding the /banned page,
+        // and that one is asked for by requirement, not offered as a posting choice.
+        addCaptchaType(CAPTCHA_TYPE_4CHAN_CAPTCHA)
         addCustomPreference(KEY_MATH_TAGS, false)
     }
 
@@ -20,6 +28,73 @@ class FourchanChanConfiguration : ChanConfiguration() {
             allowSearch = true
             allowCatalog = true
             allowArchive = true
+            allowPosting = true
+            allowDeleting = true
+            allowReporting = !StringUtils.isEmpty(get(boardName, KEY_REPORT_REASONS, ""))
+        }
+
+    override fun obtainCustomCaptchaConfiguration(captchaType: String): Captcha? {
+        if (CAPTCHA_TYPE_4CHAN_CAPTCHA == captchaType) {
+            return Captcha().apply {
+                title = "4chan Captcha"
+                input = Captcha.Input.LATIN
+                validity = Captcha.Validity.SHORT_LIFETIME
+            }
+        }
+        return null
+    }
+
+    override fun obtainPostingConfiguration(
+        boardName: String?,
+        newThread: Boolean,
+    ): Posting =
+        Posting().apply {
+            val isCancerBoard = "b" == boardName || "soc" == boardName
+            allowName = !isCancerBoard
+            allowTripcode = !isCancerBoard
+            allowEmail = true
+            allowSubject = newThread && !isCancerBoard
+            optionSage = true
+            maxCommentLength = get(boardName, KEY_MAX_COMMENT_LENGTH, 2000)
+            attachmentCount = 1
+            attachmentMimeTypes.add("image/*")
+            attachmentMimeTypes.add("video/webm")
+            attachmentSpoiler = get(boardName, KEY_SPOILERS_ENABLED, false)
+            hasCountryFlags = get(boardName, KEY_FLAGS_ENABLED, false)
+            val flags = StringUtils.emptyIfNull(get(boardName, KEY_BOARD_FLAGS, null))
+            try {
+                val jsonObject = JSONObject(flags)
+                val iterator = jsonObject.keys()
+                while (iterator.hasNext()) {
+                    val key = iterator.next()
+                    val title = jsonObject.getString(key)
+                    userIcons.add(Pair(key, title))
+                }
+                userIcons.sortWith(Comparator { lhs, rhs -> lhs.first.compareTo(rhs.first) })
+            } catch (e: JSONException) {
+                // Ignore
+            }
+        }
+
+    override fun obtainDeletingConfiguration(boardName: String?): Deleting =
+        Deleting().apply {
+            password = true
+            multiplePosts = true
+            optionFilesOnly = true
+        }
+
+    override fun obtainReportingConfiguration(boardName: String?): Reporting =
+        Reporting().apply {
+            val reportReasons = ReportReason.parse(get(boardName, KEY_REPORT_REASONS, ""))
+            for (reportReason in reportReasons) {
+                types.add(Pair(reportReason.getKey(), reportReason.title))
+            }
+        }
+
+    override fun obtainCaptchaPassConfiguration(): Authorization =
+        Authorization().apply {
+            fieldsCount = 2
+            hints = arrayOf("Token", "PIN")
         }
 
     override fun obtainCustomPreferenceConfiguration(key: String): CustomPreference? {
@@ -56,7 +131,10 @@ class FourchanChanConfiguration : ChanConfiguration() {
         var description: String? = null
         var areSpoilersEnabled = false
         var isCodeEnabled = false
+        var areFlagsEnabled = false
+        var boardFlags: JSONObject? = null
         var bumpLimit = 0
+        var maxCommentLength = 0
         var safeForWork = false
         reader.startObject()
         while (!reader.endStruct()) {
@@ -66,7 +144,20 @@ class FourchanChanConfiguration : ChanConfiguration() {
                 "meta_description" -> description = StringUtils.clearHtml(reader.nextString())
                 "spoilers" -> areSpoilersEnabled = reader.nextBoolean()
                 "code_tags" -> isCodeEnabled = reader.nextBoolean()
+                "country_flags" -> areFlagsEnabled = reader.nextBoolean()
+                "board_flags" -> {
+                    boardFlags = JSONObject()
+                    reader.startObject()
+                    while (!reader.endStruct()) {
+                        try {
+                            boardFlags.put(reader.nextName(), reader.nextString())
+                        } catch (e: JSONException) {
+                            throw IOException("A board flag cannot be stored", e)
+                        }
+                    }
+                }
                 "bump_limit" -> bumpLimit = reader.nextInt()
+                "max_comment_chars" -> maxCommentLength = reader.nextInt()
                 "ws_board" -> safeForWork = reader.nextBoolean()
                 else -> reader.skip()
             }
@@ -92,8 +183,17 @@ class FourchanChanConfiguration : ChanConfiguration() {
             }
             set(boardName, KEY_SPOILERS_ENABLED, areSpoilersEnabled)
             set(boardName, KEY_CODE_ENABLED, isCodeEnabled)
+            set(boardName, KEY_FLAGS_ENABLED, areFlagsEnabled)
+            if (boardFlags != null && boardFlags.keys().hasNext()) {
+                set(boardName, KEY_BOARD_FLAGS, boardFlags.toString())
+            } else {
+                set(boardName, KEY_BOARD_FLAGS, null)
+            }
             if (bumpLimit != 0) {
                 storeBumpLimit(boardName, bumpLimit)
+            }
+            if (maxCommentLength > 0) {
+                set(boardName, KEY_MAX_COMMENT_LENGTH, maxCommentLength)
             }
             set(boardName, KEY_SAFE_FOR_WORK, safeForWork)
             return chan.content.model.Board(boardName, title, description)
@@ -101,10 +201,23 @@ class FourchanChanConfiguration : ChanConfiguration() {
         return null
     }
 
+    fun updateReportingConfiguration(
+        boardName: String?,
+        reportReasons: List<ReportReason>?,
+    ) {
+        set(boardName, KEY_REPORT_REASONS, ReportReason.serialize(reportReasons))
+    }
+
     companion object {
+        const val CAPTCHA_TYPE_4CHAN_CAPTCHA = "4chan_captcha"
+
+        private const val KEY_FLAGS_ENABLED = "flags_enabled"
+        private const val KEY_BOARD_FLAGS = "board_flags_enabled"
         private const val KEY_SPOILERS_ENABLED = "spoilers_enabled"
         private const val KEY_CODE_ENABLED = "code_enabled"
+        private const val KEY_MAX_COMMENT_LENGTH = "max_comment_length"
         private const val KEY_SAFE_FOR_WORK = "safe_for_work"
+        private const val KEY_REPORT_REASONS = "report_reasons"
 
         private const val KEY_MATH_TAGS = "math_tags"
     }
