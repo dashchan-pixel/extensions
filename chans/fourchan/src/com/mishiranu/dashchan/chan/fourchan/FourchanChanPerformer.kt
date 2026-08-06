@@ -606,13 +606,11 @@ class FourchanChanPerformer : ChanPerformer() {
         if (!error.isNullOrEmpty()) {
             throw HttpException(0, StringUtils.clearHtml(error))
         }
-        val challenge =
-            try {
-                jsonObject.getString("challenge")
-            } catch (e: JSONException) {
-                throw InvalidResponseException(e)
-            }
-        val image = decodeCaptchaImage(jsonObject.optString("img")) ?: throw InvalidResponseException()
+        val challenge = jsonObject.optString("challenge")
+        if (challenge.isNullOrEmpty()) {
+            throw unexpectedCaptcha(jsonObject, "no challenge")
+        }
+        val image = decodeCaptchaImage(jsonObject.optString("img")) ?: throw unexpectedCaptcha(jsonObject, "no image")
         val resultImage =
             flattenCaptcha(image, decodeCaptchaImage(jsonObject.optString("bg")))
                 ?: return ReadCaptchaResult(CaptchaState.NEED_LOAD, null)
@@ -661,7 +659,7 @@ class FourchanChanPerformer : ChanPerformer() {
                 Thread.sleep((cooldownSeconds + 1) * 1000L)
             } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()
-                throw HttpException(0, null)
+                throw HttpException(0, "4chan captcha: interrupted while waiting out a cooldown")
             }
         }
     }
@@ -734,8 +732,29 @@ class FourchanChanPerformer : ChanPerformer() {
             val jsonObject = JSONObject(jsonString)
             if (jsonObject.has("twister")) jsonObject.getJSONObject("twister") else jsonObject
         } catch (e: JSONException) {
-            throw InvalidResponseException(e)
+            // Most often the block, or Cloudflare, answering with a page where the JSON should be.
+            CommonUtils.writeLog("4chan captcha", "unreadable response", responseText)
+            throw HttpException(0, "4chan captcha: the response is not the challenge")
         }
+    }
+
+    /**
+     * 4chan reshapes the captcha without notice, and a response we cannot read is the first sign of
+     * it. Naming the fields it did come with beats "invalid response" by the amount of work it
+     * saves in finding out what changed.
+     */
+    private fun unexpectedCaptcha(
+        jsonObject: JSONObject,
+        what: String,
+    ): HttpException {
+        CommonUtils.writeLog("4chan captcha", what, jsonObject.toString())
+        val fields =
+            jsonObject
+                .keys()
+                .asSequence()
+                .sorted()
+                .joinToString(", ")
+        return HttpException(0, "4chan captcha: $what (fields: $fields)")
     }
 
     /**
