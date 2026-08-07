@@ -26,13 +26,13 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7.1-pixel",
-                    "version_code": 2,
+                    "version_name": "26.8",
+                    "version_code": 3,
                     "api_version": 1,
                     "min_sdk": 36,
-                    "length": 61654,
-                    "source": "//github.com/dashchan-redacted/extensions/releases/download/26.7.1/DashchanFourchan-2.apk",
-                    "sha256sum": "E5:12:23:A2:21:B0:4A:30:90:A6:C2:D7:10:62:FE:5A:CA:9E:AA:D3:BA:95:17:B0:78:3F:DA:C0:CC:E6:88:D8",
+                    "length": 101178,
+                    "source": "//github.com/dashchan-redacted/extensions/releases/download/fourchan-26.8/DashchanFourchan-3.apk",
+                    "sha256sum": "40:8B:43:52:E6:76:17:A6:C7:C2:33:9B:FC:89:02:E0:69:07:36:0A:9D:D9:7F:25:50:8F:2E:80:96:05:EF:D3",
                     "fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
                 }
             ]
