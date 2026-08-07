@@ -116,13 +116,13 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7.1-pixel",
-                    "version_code": 2,
+                    "version_name": "26.8",
+                    "version_code": 3,
                     "api_version": 1,
                     "min_sdk": 36,
-                    "length": 64698,
-                    "source": "//github.com/dashchan-redacted/extensions/releases/download/26.7.1/DashchanArhivach-2.apk",
-                    "sha256sum": "E8:FD:9C:14:B0:DB:78:D5:D7:C3:03:1C:6D:43:51:78:F1:13:9A:5B:77:C0:77:E4:0C:1D:7C:54:44:7C:F2:5B",
+                    "length": 64850,
+                    "source": "//github.com/dashchan-redacted/extensions/releases/download/arhivach-26.8/DashchanArhivach-3.apk",
+                    "sha256sum": "91:40:CA:0F:AB:87:F6:6C:3E:2C:5D:C2:96:F5:1B:73:AA:42:27:13:8D:2F:D6:EA:C8:12:0E:9D:E2:CA:6C:7E",
                     "fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
                 }
             ]
