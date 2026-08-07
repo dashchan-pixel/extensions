@@ -757,10 +757,60 @@ class DvachChanPerformer : ChanPerformer() {
         )
 
     @Throws(HttpException::class, InvalidResponseException::class)
-    override fun onCheckAuthorization(data: CheckAuthorizationData): CheckAuthorizationResult = CheckAuthorizationResult(readCaptchaPass(data, data.authorizationData[0]).isNotEmpty())
+    override fun onCheckAuthorization(data: CheckAuthorizationData): CheckAuthorizationResult {
+        val keys = DvachSecretCaptcha.parseKeys(data.authorizationData[0])
+        if (keys != null) {
+            // No login for an application key pair: the only proof it works is that 2ch issues a
+            // challenge for the public key. A wrong key answers with result 0 and no id.
+            return CheckAuthorizationResult(readSecretCaptchaId(data, keys.publicKey, null, null) != null)
+        }
+        return CheckAuthorizationResult(readCaptchaPass(data, data.authorizationData[0]).isNotEmpty())
+    }
 
     private var lastCaptchaPassData: String? = null
     private var lastCaptchaPassCookie: String? = null
+
+    /**
+     * Key pair of the captcha pass that produced the last [CaptchaState.PASS] result. Kept out of
+     * [CaptchaData] so the private key is not copied around; the same performer instance serves
+     * [onReadCaptcha] and [onSendPost] of one posting session.
+     */
+    @Volatile private var secretCaptchaKeys: DvachSecretCaptcha.Keys? = null
+
+    /**
+     * Requests a challenge id for an application public key.
+     *
+     * @return The challenge id, `null` if 2ch refused the key, or an empty string if 2ch replied
+     * that no captcha is required at all.
+     */
+    @Throws(HttpException::class)
+    private fun readSecretCaptchaId(
+        preset: HttpRequest.Preset,
+        publicKey: String,
+        boardName: String?,
+        threadNumber: String?,
+    ): String? {
+        val uriBuilder = locator.buildPath("api", "captcha", "app", "id", publicKey).buildUpon()
+        if (boardName != null) {
+            uriBuilder.appendQueryParameter("board", boardName)
+        }
+        if (threadNumber != null) {
+            uriBuilder.appendQueryParameter("thread", threadNumber)
+        }
+        val jsonObject =
+            try {
+                JSONObject(readMobileApi(HttpRequest(uriBuilder.build(), preset).addCookie(buildCookies(null))).readString())
+            } catch (e: JSONException) {
+                return null
+            }
+        // 3 (nocaptcha) and 2 (passcode) mean the post needs no captcha fields at all, but they
+        // also mean the key was accepted, so they must not read as a failed authorization.
+        val result = jsonObject.optInt("result", 0)
+        if (result == 2 || result == 3) {
+            return ""
+        }
+        return StringUtils.nullIfEmpty(CommonUtils.optJsonString(jsonObject, "id"))
+    }
 
     @Throws(HttpException::class, InvalidResponseException::class)
     private fun readCaptchaPass(
@@ -809,7 +859,43 @@ class DvachChanPerformer : ChanPerformer() {
         if (jsonObject.optInt("enabled", 1) == 0) {
             return ReadCaptchaResult(CaptchaState.SKIP, null)
         }
-        return onReadCaptcha(data, data.captchaPass?.get(0), true)
+        val captchaPassData = data.captchaPass?.get(0)
+        val keys = DvachSecretCaptcha.parseKeys(captchaPassData)
+        if (keys != null) {
+            return onReadSecretCaptcha(data, keys)
+        }
+        secretCaptchaKeys = null
+        return onReadCaptcha(data, captchaPassData, true)
+    }
+
+    /**
+     * Application key pair path. The challenge is signed, never shown, so this always resolves to
+     * [CaptchaState.PASS] or [CaptchaState.SKIP] -- there is nothing for the user to solve.
+     *
+     * The challenge id itself is not carried over to [onSendPost]: it expires after 180 seconds,
+     * which a user writing a post routinely outlives. Only the fact that the key pair works is
+     * settled here; the id the post is signed with is fetched right before sending.
+     */
+    @Throws(HttpException::class)
+    private fun onReadSecretCaptcha(
+        data: ReadCaptchaData,
+        keys: DvachSecretCaptcha.Keys,
+    ): ReadCaptchaResult {
+        val id = readSecretCaptchaId(data, keys.publicKey, data.boardName, data.threadNumber)
+        if (id == null) {
+            secretCaptchaKeys = null
+            configuration.setMaxFilesCountEnabled(false)
+            return onReadCaptcha(data, null, true)
+        }
+        secretCaptchaKeys = keys
+        configuration.setMaxFilesCountEnabled(false)
+        if (id.isEmpty()) {
+            return ReadCaptchaResult(CaptchaState.SKIP, null)
+        }
+        val captchaData = CaptchaData()
+        captchaData.put(SECRET_CAPTCHA_PUBLIC_KEY, keys.publicKey)
+        return ReadCaptchaResult(CaptchaState.PASS, captchaData)
+            .setValidity(ChanConfiguration.Captcha.Validity.LONG_LIFETIME)
     }
 
     @Throws(HttpException::class, InvalidResponseException::class)
@@ -1002,7 +1088,23 @@ class DvachChanPerformer : ChanPerformer() {
 
         var captchaPassCookie: String? = null
         val captchaData = data.captchaData
-        if (captchaData != null) {
+        val secretCaptchaPublicKey = captchaData?.get(SECRET_CAPTCHA_PUBLIC_KEY)
+        if (secretCaptchaPublicKey != null) {
+            // Signed posting: the challenge id lives 180 seconds, so it is taken now and used
+            // immediately instead of being carried over from onReadCaptcha.
+            val keys =
+                secretCaptchaKeys?.takeIf { it.publicKey == secretCaptchaPublicKey }
+                    ?: throw InvalidResponseException()
+            val id =
+                readSecretCaptchaId(data, keys.publicKey, data.boardName, data.threadNumber)
+                    ?: throw InvalidResponseException()
+            // An empty id is 2ch answering that this post needs no captcha fields at all.
+            if (id.isNotEmpty()) {
+                entity.add("captcha_type", DvachSecretCaptcha.CAPTCHA_TYPE)
+                entity.add(DvachSecretCaptcha.FIELD_RESPONSE_ID, id)
+                entity.add(DvachSecretCaptcha.FIELD_RESPONSE, keys.sign(id))
+            }
+        } else if (captchaData != null) {
             captchaPassCookie = captchaData[CAPTCHA_PASS_COOKIE]
             val challenge = captchaData[CaptchaData.CHALLENGE]
             val input = StringUtils.emptyIfNull(captchaData[CaptchaData.INPUT])
@@ -1247,6 +1349,7 @@ class DvachChanPerformer : ChanPerformer() {
         private val MOBILE_API_DELAYS = intArrayOf(0, 250, 500, 1000)
 
         private const val CAPTCHA_PASS_COOKIE = "captchaPassCookie"
+        private const val SECRET_CAPTCHA_PUBLIC_KEY = "secretCaptchaPublicKey"
 
         private val PATTERN_TAG = Pattern.compile("(.*) /([^/]*)/")
         private val PATTERN_BAN =
