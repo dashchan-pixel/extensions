@@ -1,0 +1,5 @@
+* Posting, deleting, reporting and the 4chan Pass work again — the extension had been browse-only since the captcha stopped working
+* The captcha is solved in the app again, past the check that had replaced it: 4chan's own captcha page is let through in the WebView and the cookies it leaves behind are carried back
+* Posts, deletions and reports go to the board they belong to instead of the site root, which had stopped answering them
+* A captcha 4chan hands out that the app cannot show — the hCaptcha gate and the pick-the-pictures variant — is named instead of failing as a broken response
+* A captcha that cannot be read says what actually arrived instead of "Unknown error", and a ticket cooldown is counted down instead of reported as nothing

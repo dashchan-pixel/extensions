@@ -1,0 +1,4 @@
+* Posting works on the boards that check the captcha: the site asks for reCAPTCHA 3 and the extension was answering with a version 2 token, which /b/ refused every time
+* A board that checks no captcha no longer solves one for a field the server never reads
+* A ban is explained instead of being reported as the single word "Banned": its reason, when it was passed and when it lapses, and the number the appeal form addresses it by, all kept in the app's ban log
+* Needs app 26.8.1 or newer, which is where reCAPTCHA 3 support lives

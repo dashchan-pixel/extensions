@@ -1,0 +1,5 @@
+* Private [secret] text addressed to you is revealed in the post itself, drawn in the theme's capcode colour
+* The posting form has a private-text button that wraps the selection in [secret]
+* The slide captcha is solved by dragging the piece into the gap, in the app's own dialog, instead of the guessing game it stood in with
+* Your identity now survives posting, deleting and reporting: the board hands out fresh auth cookies with every one of those and they were being dropped, so managing your own posts works
+* Needs app 26.8.1 or newer — the private text and the slider dialog are provided by the app, and an older build does not have them
