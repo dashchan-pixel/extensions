@@ -8,13 +8,13 @@
             "packages": [
                 {
                     "title": "Release",
-                    "version_name": "26.7.3",
-                    "version_code": 4,
+                    "version_name": "26.8",
+                    "version_code": 5,
                     "api_version": 1,
                     "min_sdk": 36,
-                    "length": 295990,
-                    "source": "//github.com/dashchan-redacted/extensions/releases/download/dvach-26.7.3/DashchanDvach-4.apk",
-                    "sha256sum": "04:3F:40:B4:5B:54:05:C2:C1:D5:AE:30:E7:8A:BE:EC:B9:E5:A2:ED:A9:14:B1:98:2A:D2:27:AD:C6:F9:F4:11",
+                    "length": 298038,
+                    "source": "//github.com/dashchan-redacted/extensions/releases/download/dvach-26.8/DashchanDvach-5.apk",
+                    "sha256sum": "EA:3A:F1:85:E2:D0:9E:6A:0E:AE:3A:31:24:79:2B:C1:BA:D1:7F:B5:C8:5C:62:21:D8:9F:75:EE:EE:F7:DF:11",
                     "fingerprint": "16:F0:D0:D0:89:5B:3F:C5:4D:5E:A1:72:D7:98:CA:5E:1D:B5:15:A2:C4:7B:91:F5:B5:1B:1D:F5:2A:3E:04:C0"
                 }
             ]
