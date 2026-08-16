@@ -1,5 +1,10 @@
 # Dashchan Extensions
 
+> [!CAUTION]
+> Public distribution is now suspended. Future extension releases and updates are
+> for subscribers at [patreon.com/pikun](https://patreon.com/pikun), starting with
+> the cheapest tier. I may give away free access from time to time, so keep an eye out.
+
 The extension APKs for [dashchan-redacted/client](https://github.com/dashchan-redacted/client),
 a subset of the upstream set. Each extension is a separate APK the client loads dynamically; the
 ones this repository carries are the directories under `chans/`.
